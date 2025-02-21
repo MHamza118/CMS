@@ -20,11 +20,9 @@
             border-radius: 4px;
             cursor: pointer;
         }
-
         .notification-btn:hover {
             background-color: #45a049;
         }
-
         .status-sent {
             color: #666;
             font-style: italic;
@@ -34,42 +32,32 @@
             border-collapse: collapse;
             margin-bottom: 20px;
         }
-
         th, td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
-
         th {
             background-color: #f2f2f2;
         }
-
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
-
         tr:hover {
             background-color: #f5f5f5;
         }
-
-        /* Status colors */
         .status-pending {
             color: #f39c12;
             font-weight: bold;
         }
-
         .status-approved {
             color: #27ae60;
             font-weight: bold;
         }
-
         .status-rejected {
             color: #c0392b;
             font-weight: bold;
         }
-
-        /* Filter section styles */
         .filter-section {
             margin: 20px 0;
             padding: 15px;
@@ -79,7 +67,6 @@
             align-items: center;
             gap: 10px;
         }
-
         .filter-section span {
             font-weight: bold;
             color: #333;
@@ -93,23 +80,18 @@
             min-width: 120px;
             cursor: pointer;
         }
-
         .filter-section select:hover {
             border-color: #aaa;
         }
-
         .filter-section select:focus {
             outline: none;
             border-color: #4CAF50;
             box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
         }
-
-        /* Action button styles */
         .action-buttons {
             display: flex;
             gap: 8px;
         }
-
         .approve-btn, .reject-btn {
             padding: 6px 12px;
             border: none;
@@ -118,48 +100,37 @@
             font-size: 14px;
             transition: background-color 0.2s;
         }
-
         .approve-btn {
             background-color: #27ae60;
             color: white;
         }
-
         .reject-btn {
             background-color: #e74c3c;
             color: white;
         }
-
         .approve-btn:hover {
             background-color: #219a52;
         }
-
         .reject-btn:hover {
             background-color: #c0392b;
         }
-
-        /* Admin section headers */
         #adminHolidays h2 {
             color: #2c3e50;
             margin-bottom: 20px;
             font-size: 24px;
         }
-
-        /* Empty state message */
         .no-requests {
             text-align: center;
             color: #666;
             padding: 20px;
             font-style: italic;
         }
-
-        /* Notification icon styles */
         .notification-icon {
             font-size: 24px;
             cursor: pointer;
             position: relative;
             margin-left: 20px;
         }
-
         .notification-icon .badge {
             position: absolute;
             top: -5px;
@@ -170,8 +141,6 @@
             padding: 2px 6px;
             font-size: 12px;
         }
-
-        /* Notification pop-up styles */
         #notificationPopup {
             display: none;
             position: absolute;
@@ -194,7 +163,6 @@
             <button id="loginBtn">Login</button>
         </div>
     </div>
-
     <!-- Employee Page -->
     <div id="employeePage" style="display: none;">
         <div class="header">
@@ -212,7 +180,35 @@
                 </div>
             </div>
         </div>
-
+        <!---Employee Page Summary Section-->
+        <div class="summary-section">
+            <div class="summary-subsection">
+                <h3>Present Summary</h3>
+                <div class="summary-item">
+                    <h4>Total Check-Ins</h4>
+                    <p id="totalCheckIns">0</p>
+                </div>
+                <div class="summary-item">
+                    <h4>Total Check-Outs</h4>
+                    <p id="totalCheckOuts">0</p>
+                </div>
+                <div class="summary-item">
+                    <h4>Late Check-Ins</h4>
+                    <p id="lateCheckIns">0</p>
+                </div>
+            </div>
+            <div class="summary-subsection">
+                <h3>Not Present Summary</h3>
+                <div class="summary-item">
+                    <h4>Total Absences</h4>
+                    <p id="totalAbsences">0</p>
+                </div>
+                <div class="summary-item">
+                    <h4>Unapproved Leaves</h4>
+                    <p id="unapprovedLeaves">0</p>
+                </div>
+            </div>
+        </div>
         <div class="container">
             <div class="left-sidebar">
                 <button onclick="showSection('attendance')">Check In/Out</button>
@@ -221,20 +217,20 @@
                 <button onclick="openTimeTableModal()">Time Table</button>
                 <button onclick="logout()">Logout</button>
             </div>
-
+             <!-- Dark overlay -->
+            <div id="modalOverlay" onclick="closeTimeTableModal()"></div>
             <!-- Time Table Modal -->
-            <div id="timeTableModal" style="display: none;">
-                <h2>Set Your Time Table</h2>
-                <label for="checkInTime">Check-In Time:</label>
-                <input type="time" id="checkInTime" style="width: 150px;">
-                <br>
-                <label for="checkOutTime">Check-Out Time:</label>
-                <input type="time" id="checkOutTime" style="width: 140px;">
-                <br><br>
-                <button onclick="saveTimeTable()" style="width: 100px; padding: 5px;">Save</button>
-                <button onclick="closeTimeTableModal()" style="width: 100px; padding: 5px;">Cancel</button>
+            <div id="timeTableModal">
+            <h2>Set Your Time Table</h2>
+            <label for="checkInTime">Check-In Time:</label>
+            <input type="time" id="checkInTime">
+            <br>
+            <label for="checkOutTime">Check-Out Time:</label>
+            <input type="time" id="checkOutTime">
+            <br><br>
+            <button onclick="saveTimeTable()">Save</button>
+            <button class="close-btn" onclick="closeTimeTableModal()">Close</button>
             </div>
-
             <div class="main-content">
                 <div class="employee-header">
                     <p id="employeeDetails">Hamza | ID: 118</p>
@@ -243,8 +239,7 @@
                         <button onclick="handleCheckOut()">Check Out</button>
                         <button id="lateCheckInBtn" onclick="handleLateCheckIn()" style="display: none;">Add Late Check-In</button>
                     </div>
-                </div>
-                
+                </div>               
                 <!-- Attendance Section -->
                 <div id="attendance-section" class="section" style="display: block;">
                     <table>
@@ -260,7 +255,6 @@
                         <tbody id="attendanceTable"></tbody>
                     </table>
                 </div>
-
                 <!-- Progress Section -->
                 <div id="progress-section" class="section" style="display: none;">
                     <h2>Submit Daily Progress</h2>
@@ -295,7 +289,6 @@
                         </table>
                     </div>
                 </div>
-
                 <!-- Holiday Requests Section -->
                 <div id="holidayRequests" class="section" style="display: none;">
                     <h2>Your Holiday Requests</h2>
@@ -315,7 +308,6 @@
             </div>
         </div>
     </div>
-
     <!-- Admin Page -->
     <div id="adminPage" style="display: none;">
         <div class="header">
@@ -329,7 +321,6 @@
                 </select>
             </div>
         </div>
-
         <div class="container">
             <div class="left-sidebar">
                 <div class="main-buttons">
@@ -342,7 +333,6 @@
                 <div class="bottom-buttons">
                 </div>
             </div>
-
             <div class="main-content">
                 <div id="adminAttendance" style="display: block;">
                     <h2>Employee Attendance</h2>
@@ -359,7 +349,6 @@
                         </thead>
                         <tbody id="adminAttendanceTable"></tbody>
                     </table>
-
                     <div class="missed-checkins-section">
                         <h2>Missed Check Ins</h2>
                         <table id="MissedCheckInsTable">
@@ -375,7 +364,6 @@
                             <tbody></tbody>
                         </table>
                     </div>
-
                     <!-- Summary of Missed Check-Ins -->
                     <div class="summary-section">
                         <h3>Summary of Missed Check-Ins</h3>
@@ -393,7 +381,21 @@
                         </table>
                     </div>
                 </div>
-
+                <!-- Time Table Section -->
+                <div id="adminTimeTable" style="display: none;">
+                <h2>Employee Time Table</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Check-In Time</th>
+                            <th>Check-Out Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTimeTableBody"></tbody>
+                </table>
+            </div>
+            <!--Admin Progress Report Section-->
                 <div id="adminProgress" style="display: none;">
                     <h2>Employee Progress Reports</h2>
                     <table>
@@ -410,7 +412,7 @@
                         <tbody id="adminProgressTable"></tbody>
                     </table>
                 </div>
-
+                <!--Admin Holiday Request Section-->
                 <div id="adminHolidays" style="display: none;">
                     <h2>Holiday Requests</h2>
                     <div class="filter-section">
@@ -439,25 +441,9 @@
                 </div>
             </div>
         </div>
-        
-            <!-- Time Table Section -->
-            <div id="adminTimeTable" style="display: none;">
-                <h2>Employee Time Table</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Employee</th>
-                            <th>Check-In Time</th>
-                            <th>Check-Out Time</th>
-                        </tr>
-                    </thead>
-                    <tbody id="adminTimeTableBody"></tbody>
-                </table>
-            </div>
     </div>
 
     <script>
-        // User credentials
         const users = {
             'admin': { password: 'admin123', role: 'admin' },
             'hamza': { password: 'hamza123', id: '118', role: 'employee', phone: '923480970884' },
@@ -465,11 +451,10 @@
             'hanzallah': { password: 'hanzallah123', id: '120', role: 'employee', phone: '923474224118' }
         };
 
-        // Initialize the application
+        //Login Page
         document.getElementById('loginBtn').addEventListener('click', () => {
             const username = document.getElementById('userName').value.toLowerCase();
-            const password = document.getElementById('userPassword').value;
-            
+            const password = document.getElementById('userPassword').value;        
             const user = users[username];
             if (user && user.password === password) {
                 if (user.role === 'admin') {
@@ -478,23 +463,21 @@
                 } else {
                     showPage('employeePage');
                     document.getElementById('employeeDetails').textContent = `${username} | ID: ${user.id}`;
-                    loadAttendanceTable(); // Load attendance data immediately
-                    loadEmployeeHolidayRequests(); // Load holiday requests for the employee
+                    loadAttendanceTable();
+                    loadEmployeeHolidayRequests();
                 }
             } else {
                 alert('Invalid username or password');
             }
         });
-
-        // Show/hide pages
         function showPage(pageId) {
             ['loginPage', 'employeePage', 'adminPage'].forEach(id => {
                 document.getElementById(id).style.display = id === pageId ? 'block' : 'none';
             });
         }
 
-        // Update time display
-        function updateTime() {
+        // Date & Time Display
+            function updateTime() {
             const now = new Date();
             const timeString = now.toLocaleTimeString();
             const dateString = now.toLocaleDateString('en-US', { 
@@ -506,40 +489,35 @@
             document.getElementById('currentTime').textContent = timeString;
             document.getElementById('currentDate').textContent = `${dateString} | ${timeString}`;
 
-            // Check for missed check-in after 10:30 AM
+            // Checking missed check-in after 10:30 AM.
             const currentHour = now.getHours();
             const currentMinutes = now.getMinutes();
             const currentTime = currentHour * 60 + currentMinutes;
-            const checkInDeadline = 10 * 60 + 30; // 10:30 AM in minutes
-
+            const checkInDeadline = 10 * 60 + 30;
             if (currentTime === checkInDeadline) {
                 const currentUser = document.getElementById('employeeDetails')?.textContent.split('|')[0].trim();
                 if (currentUser) {
                     const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
                     const todayRecord = attendanceRecords.find(record => 
-                        record.employee === currentUser && 
-                        record.date === dateString
+                        record.employee === currentUser && record.date === dateString
                     );
-
                     if (!todayRecord || !todayRecord.checkIn) {
                         const notifications = JSON.parse(localStorage.getItem('notifications')) || [];
                         const existingNotification = notifications.find(n => 
                             n.employee === currentUser && 
-                            n.date === dateString && 
-                            n.type === 'missed_checkin'
+                            n.date === dateString && n.type === 'missed_checkin'
                         );
-
                         if (!existingNotification) {
                             notifications.push({
                                 employee: currentUser,
                                 date: dateString,
                                 time: timeString,
                                 type: 'missed_checkin',
-                                message: 'You forgot to check in for today!'
+                                message: 'You forgot to check in for today.'
                             });
                             localStorage.setItem('notifications', JSON.stringify(notifications));
                             
-                            // Update notification icon
+                            // Updating the bell/notification icon
                             const notificationIcon = document.querySelector('.notification-icon');
                             if (notificationIcon) {
                                 notificationIcon.style.display = 'block';
@@ -549,37 +527,33 @@
                 }
             }
         }
+        //Update the clock/Time for every second.
         setInterval(updateTime, 1000);
         updateTime();
 
-        // Employee functions
+        // Employee Page Functions.
         function handleCheckIn() {
             const now = new Date();
             const hours = now.getHours();
             const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-
+            //check the condition for check in after 10AM, If yes then ADD LATE CHECK IN button will be displayed.
             if (hours >= 10) {
                 alert('You cannot check in after 10:00 AM. Please contact your supervisor.');
-                document.getElementById('lateCheckInBtn').style.display = 'block'; // Show late check-in button
+                document.getElementById('lateCheckInBtn').style.display = 'block';
                 recordMissedCheckIn();
                 return;
             }
-
-            // Add attendance record
             addAttendanceRecord('checkIn');
-            
-            // Show success message
+            //Alert for successful check in.
             alert('Check-in successful! Time recorded: ' + now.toLocaleTimeString());
-            clearNotifications(); // Clear notifications on successful check-in
+            clearNotifications();
         }
-
         function handleLateCheckIn() {
             const now = new Date();
             const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
             const date = now.toLocaleDateString();
             const day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
             const time = now.toLocaleTimeString();
-
             let lateCheckIns = JSON.parse(localStorage.getItem('lateCheckIns')) || [];
             lateCheckIns.push({
                 employee: employee,
@@ -587,98 +561,79 @@
                 day: day,
                 time: time
             });
-
             localStorage.setItem('lateCheckIns', JSON.stringify(lateCheckIns));
             alert('Late check-in recorded successfully!');
-
-            // Update attendance table
             loadAttendanceTable();
         }
-
         function handleCheckOut() {
             const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
             const now = new Date();
             const time = now.toLocaleTimeString();
-            
-            // Add check-out record
             addAttendanceRecord('checkOut');
-            
-            // Show success message
+            //ALert for a successful check out.
             alert('Check-out successful! Time recorded: ' + time);
-            clearNotifications(); // Clear notifications on successful check-out
+            clearNotifications();
         }
-
         function addAttendanceRecord(type) {
-            // Get current date and time
             const now = new Date();
             const date = now.toLocaleDateString();
             const time = now.toLocaleTimeString();
             const day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
             const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-
-            // Get existing attendance records from localStorage
+            //Update/Retrieve the Attendance Records from the local storage.
             let attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
-
-            // Find if there's an existing record for today
+            //Check if there's any Existing Records for Today.
             let todayRecord = attendanceRecords.find(record => 
                 record.date === date && 
                 record.employee === employee
             );
-
+            //Condition: If there's no Record for Today, then this will Create a New Record.
             if (!todayRecord) {
-                // Create new record if none exists for today
                 todayRecord = {
                     employee: employee,
                     date: date,
                     day: day,
                     checkIn: type === 'checkIn' ? time : '',
-                    checkOut: type === 'checkOut' ? [time] : [], // Store checkOut as array
+                    checkOut: type === 'checkOut' ? [time] : [], //ARRAY for multiple times check out.
                 };
                 attendanceRecords.push(todayRecord);
-            } else {
-                // Update existing record
+            }
+                //Otherwise Update an existing record.
+                else {
                 if (type === 'checkIn' && !todayRecord.checkIn) {
                     todayRecord.checkIn = time;
                 } else if (type === 'checkOut') {
-                    // Initialize checkOut array if it doesn't exist
+                    //Condition: Initializing the CheckOut ARRAY if it doesn't exist.
                     if (!Array.isArray(todayRecord.checkOut)) {
                         todayRecord.checkOut = todayRecord.checkOut ? [todayRecord.checkOut] : [];
                     }
-                    // Add new check-out time
+                    //Adding new check-out time
                     todayRecord.checkOut.push(time);
                 }
             }
-
-            // Save back to localStorage
+            //Save The ATTENDACE RECORDS to local storage.
             localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
-
-            // Update both employee and admin views
+            //Update/Load both the EMPLOYEE & ADMIN views.
             loadAttendanceTable();
             if (document.getElementById('adminPage').style.display !== 'none') {
-                const selectedUser        = document.getElementById('adminUser   Select')?.value || '';
-                loadAdminData(selectedUser        );
+                const selectedUser = document.getElementById('adminUserSelect')?.value || '';
+                loadAdminData(selectedUser);
             }
         }
-
         function loadAttendanceTable() {
             const attendanceTable = document.getElementById('attendanceTable');
             const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
             const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
             const lateCheckIns = JSON.parse(localStorage.getItem('lateCheckIns')) || [];
-
-            // Clear existing table content
             attendanceTable.innerHTML = '';
-
             // Filter and display attendance records
             attendanceRecords
                 .filter(record => record.employee === employee)
                 .sort((a, b) => new Date(b.date) - new Date(a.date))
                 .forEach(record => {
-                    const checkOutTimes = Array.isArray(record.checkOut) ? record.checkOut : 
-                        (record.checkOut ? [record.checkOut] : []);
+                    const checkOutTimes = Array.isArray(record.checkOut) ? record.checkOut : (record.checkOut ? [record.checkOut] : []);
                     const lateCheckInTimes = lateCheckIns.filter(late => late.employee === employee && late.date === record.date);
-
-                    // Create a row for check-in
+                    //Creating a row for checkin.
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${record.date}</td>
@@ -688,8 +643,7 @@
                         <td>${lateCheckInTimes.length > 0 ? lateCheckInTimes[0].time : '-'}</td>
                     `;
                     attendanceTable.appendChild(row);
-
-                    // Create additional rows for each check-out time after the first one
+                    //Condition and a Loop for creating an additional row for each check out.
                     if (checkOutTimes.length > 1) {
                         for (let i = 1; i < checkOutTimes.length; i++) {
                             const checkOutRow = document.createElement('tr');
@@ -703,8 +657,7 @@
                             attendanceTable.appendChild(checkOutRow);
                         }
                     }
-
-                    // Create additional rows for each late check-in after the first one
+                    //Condition and a Loop for creating an additional row for each late check in.
                     if (lateCheckInTimes.length > 1) {
                         for (let i = 1; i < lateCheckInTimes.length; i++) {
                             const lateRow = document.createElement('tr');
@@ -719,23 +672,20 @@
                         }
                     }
                 });
-        }
-
-        function recordMissedCheckIn() {
+            }
+            //Record and Update the MISSED CHECKIN section.
+            function recordMissedCheckIn() {
             const now = new Date();
             const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
             const date = now.toLocaleDateString();
             const day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
             const time = now.toLocaleTimeString();
-
-            let missedCheckIns = JSON.parse(localStorage.getItem('missedCheckIns')) || [];
-            
-            // Check if already recorded for today
+            //storing each missed check in record in the local storage.
+            let missedCheckIns = JSON.parse(localStorage.getItem('missedCheckIns')) || [];    
+            //Checking if the missed check in is already recorded for today.
             const alreadyRecorded = missedCheckIns.some(record => 
-                record.employee === employee && 
-                record.date === date
+            record.employee === employee && record.date === date
             );
-
             if (!alreadyRecorded) {
                 missedCheckIns.push({
                     employee: employee,
@@ -743,89 +693,78 @@
                     day: day,
                     time: time,
                     notificationSent: false,
-                    status: 'Pending'
                 });
-
                 localStorage.setItem('missedCheckIns', JSON.stringify(missedCheckIns));
-
-                // If admin panel is open, refresh it
+                // If admin panel is open, refresh it.
                 if (document.getElementById('adminPage').style.display !== 'none') {
-                    const selectedUser        = document.getElementById('adminUser   Select')?.value || '';
-                    loadMissedCheckIns(selectedUser        );
+                    const selectedUser = document.getElementById('adminUserSelect')?.value || '';
+                    loadMissedCheckIns(selectedUser);
+                }
+            }
+                // Automatically send notification to the employee for missed checkin.
+                sendNotification(employee);
+                }
+                //Function to send notification to the employee for missed checkins and update the notification count.
+                function sendNotification(employee) {
+                const notificationCount = document.getElementById('notificationCount');
+                let count = parseInt(notificationCount.textContent) || 0;
+                count++;
+                notificationCount.textContent = count;
+                const notificationList = document.getElementById('notificationList');
+                const notificationItem = document.createElement('div');
+                notificationItem.textContent = `Missed check-in notification sent to ${employee}.`;
+                notificationList.appendChild(notificationItem);
+            }
+                //Function to clear the notifications list and update the count.
+                function clearNotifications() {
+                const notificationCount = document.getElementById('notificationCount');
+                notificationCount.textContent = '0';
+                document.getElementById('notificationList').innerHTML = '';
+            }
+                function toggleNotificationPopup() {
+                const popup = document.getElementById('notificationPopup');
+                popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+            }
+                function showSection(sectionName) {
+                //Hiding all sections first.
+                document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+                });
+                // Show the selected section
+                const selectedSection = document.getElementById(sectionName + '-section');
+                if (selectedSection) {
+                selectedSection.style.display = 'block';
+                }
+
+                // Load specific section data if needed
+                if (sectionName === 'progress') {
+                loadEmployeeProgress();
                 }
             }
 
-            // Automatically send notification to the employee
-            sendNotification(employee);
-        }
+                // Admin Page functions
+                function handleUserSelect() {
+                const selectedUser = document.getElementById('adminUserSelect').value;
+                showAdminSection('adminAttendance');
+                loadAdminData(selectedUser);
+                }
 
-        function sendNotification(employee) {
-            const notificationCount = document.getElementById('notificationCount');
-            let count = parseInt(notificationCount.textContent) || 0;
-            count++;
-            notificationCount.textContent = count;
-
-            const notificationList = document.getElementById('notificationList');
-            const notificationItem = document.createElement('div');
-            notificationItem.textContent = `Missed check-in notification sent to ${employee}.`;
-            notificationList.appendChild(notificationItem);
-        }
-
-        function clearNotifications() {
-            const notificationCount = document.getElementById('notificationCount');
-            notificationCount.textContent = '0';
-            document.getElementById('notificationList').innerHTML = ''; // Clear notification list
-        }
-
-        function toggleNotificationPopup() {
-            const popup = document.getElementById('notificationPopup');
-            popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function showSection(sectionName) {
-            // Hide all sections first
-            document.querySelectorAll('.section').forEach(section => {
-                section.style.display = 'none';
-            });
-            
-            // Show the selected section
-            const selectedSection = document.getElementById(sectionName + '-section');
-            if (selectedSection) {
-                selectedSection.style.display = 'block';
-            }
-
-            // Load specific section data if needed
-            if (sectionName === 'progress') {
-                loadEmployeeProgress();
-            }
-        }
-
-        // Admin functions
-        function handleUserSelect() {
-            const selectedUser = document.getElementById('adminUserSelect').value;
-            showAdminSection('adminAttendance');
-            loadAdminData(selectedUser);
-        }
-
-        function loadAdminData(selectedUser = '') {
-            // First load the attendance records
-            const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
-            const tableBody = document.getElementById('adminAttendanceTable');
-            if (!tableBody) return; // Exit if not in attendance view
-
-            tableBody.innerHTML = '';
-
-            // Filter and display attendance records
-            attendanceRecords
+                function loadAdminData(selectedUser = '') {
+                // First load the attendance records
+                const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
+                const tableBody = document.getElementById('adminAttendanceTable');
+                if (!tableBody) return; //come out of the function if not in attendance view.
+                tableBody.innerHTML = '';
+                // Filtering/Retrieving the data from local storage and displaying attendance records.
+                attendanceRecords
                 .filter(record => !selectedUser || record.employee === selectedUser)
                 .sort((a, b) => new Date(b.date) - new Date(a.date))
                 .forEach(record => {
                     const checkOutTimes = Array.isArray(record.checkOut) ? record.checkOut : 
-                        (record.checkOut ? [record.checkOut] : []);
+                    (record.checkOut ? [record.checkOut] : []);
                     const lateCheckIns = JSON.parse(localStorage.getItem('lateCheckIns')) || [];
                     const lateCheckInTimes = lateCheckIns.filter(late => late.employee === record.employee && late.date === record.date);
-
-                    // Create a row for check-in
+                    //Creating a row for Late checkin.
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${record.employee}</td>
@@ -836,8 +775,7 @@
                         <td>${lateCheckInTimes.length > 0 ? lateCheckInTimes[0].time : '-'}</td>
                     `;
                     tableBody.appendChild(row);
-
-                    // Create additional rows for each check-out time after the first one
+                    //Condition: Create additional rows for each check-out time after the first one
                     if (checkOutTimes.length > 1) {
                         for (let i = 1; i < checkOutTimes.length; i++) {
                             const checkOutRow = document.createElement('tr');
@@ -852,12 +790,11 @@
                             tableBody.appendChild(checkOutRow);
                         }
                     }
-
-                    // Create additional rows for each late check-in after the first one
-                    if (lateCheckInTimes.length > 1) {
-                        for (let i = 1; i < lateCheckInTimes.length; i++) {
-                            const lateRow = document.createElement('tr');
-                            lateRow.innerHTML = `
+                        //Condition: Create additional rows for each late checkin.
+                        if (lateCheckInTimes.length > 1) {
+                            for (let i = 1; i < lateCheckInTimes.length; i++) {
+                                const lateRow = document.createElement('tr');
+                                lateRow.innerHTML = `
                                 <td>${record.employee}</td>
                                 <td>${record.date}</td>
                                 <td>${record.day}</td>
@@ -869,25 +806,21 @@
                         }
                     }
                 });
+                    loadMissedCheckIns(selectedUser);
+                    updateMissedCheckInsSummary();
+            }
+                    function loadMissedCheckIns(selectedUser = '') {
+                    const missedCheckIns = JSON.parse(localStorage.getItem('missedCheckIns')) || [];
+                    const tableBody = document.getElementById('MissedCheckInsTable').getElementsByTagName('tbody')[0];
+                    if (!tableBody) return; //come out of the function if table doesn't exist.
+                    tableBody.innerHTML = '';
 
-            // Then load the missed check-ins
-            loadMissedCheckIns(selectedUser);
-            updateMissedCheckInsSummary();
-        }
-
-        function loadMissedCheckIns(selectedUser = '') {
-            const missedCheckIns = JSON.parse(localStorage.getItem('missedCheckIns')) || [];
-            const tableBody = document.getElementById('MissedCheckInsTable').getElementsByTagName('tbody')[0];
-            
-            if (!tableBody) return; // Return if table doesn't exist (not in admin view)
-            
-            tableBody.innerHTML = '';
-
-            // Filter by selected user if specified and sort by date (most recent first)
-            missedCheckIns
-                .filter(record => !selectedUser || record.employee === selectedUser)
-                .sort((a, b) => new Date(b.date) - new Date(a.date))
-                .forEach((record) => {
+                    //Show the missed check ins data of the selected user and admin can send a whatsapp notification.
+                    //Also filtering by date and show the most recent missed check ins first.
+                    missedCheckIns
+                    .filter(record => !selectedUser || record.employee === selectedUser)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .forEach((record) => {
                     const employee = users[record.employee];
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -902,114 +835,94 @@
                         </td>
                     `;
                     tableBody.appendChild(row);
-                });
-        }
-
-        function updateMissedCheckInsSummary() {
-            const missedCheckIns = JSON.parse(localStorage.getItem('missedCheckIns')) || [];
-            const totalMissedCheckIns = missedCheckIns.length;
-            document.getElementById('totalMissedCheckIns').textContent = totalMissedCheckIns;
-        }
-
-        function sendWhatsAppMessage(phone) {
-            const message = "Hello! This is a reminder that you missed your check-in today.";
-            const encodedMessage = encodeURIComponent(message);
-            const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
-            console.log("WhatsApp URL:", url);
-            window.open(url, "_blank");
-        }
-
-        function logout() {
-            showPage('loginPage');
-            document.getElementById('userName').value = '';
-            document.getElementById('userPassword').value = '';
-        }
-
-        function openHolidayRequest() {
-            const employeeName = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-            window.open(`holiday_request.html?employee=${encodeURIComponent(employeeName)}`, '_blank', 'width=800,height=800');
-        }
-
-        function submitProgress() {
-            const progressMessage = document.getElementById('progressMessage').value.trim();
-            const fileInput = document.getElementById('progressFile');
-            const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-            const now = new Date();
-
-            if (!progressMessage) {
-                alert('Please enter progress details');
-                return;
-            }
-
-            // Handle file
-            const file = fileInput.files[0];
-            let fileData = null;
-            let fileName = '';
-
-            if (file) {
-                // Read file as base64
-                const reader = new FileReader();
-                reader.onload = function(e) {
+                    });
+                }
+                    //Updating the missed summary check ins section in the admin panel.
+                    function updateMissedCheckInsSummary() {
+                    const missedCheckIns = JSON.parse(localStorage.getItem('missedCheckIns')) || [];
+                    const totalMissedCheckIns = missedCheckIns.length;
+                    document.getElementById('totalMissedCheckIns').textContent = totalMissedCheckIns;
+                }
+                    //Whatsapp API Integration.
+                    //Function to send a whatsapp message to the specific employee for their missed check in of the day.
+                    function sendWhatsAppMessage(phone) {
+                    const message = "Hello! This is a reminder that you missed your check-in today.";
+                    const encodedMessage = encodeURIComponent(message);
+                    const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
+                    console.log("WhatsApp URL:", url);
+                    window.open(url, "_blank");
+                }
+                    //Function for opening the Employee Holiday Request Section in a new window.
+                    function openHolidayRequest() {
+                    const employeeName = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
+                    window.open(`holiday_request.html?employee=${encodeURIComponent(employeeName)}`, '_blank', 'width=800,height=800');
+                }
+                    //Function for Submitting the Progress Report in the Employee Page.
+                    function submitProgress() {
+                    const progressMessage = document.getElementById('progressMessage').value.trim();
+                    const fileInput = document.getElementById('progressFile');
+                    const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
+                    const now = new Date();
+                    if (!progressMessage) {
+                    alert('Please enter progress details');
+                    return;
+                }
+                    //Employee Page Progress Report Section File Handling
+                    const file = fileInput.files[0];
+                    let fileData = null;
+                    let fileName = '';
+                    //Condition: Read the file as base64
+                    if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
                     fileData = e.target.result;
                     fileName = file.name;
-                    
-                    // Save progress with file
                     saveProgressWithFile(progressMessage, fileData, fileName);
-                };
-                reader.readAsDataURL(file);
-            } else {
-                // Save progress without file
-                saveProgressWithFile(progressMessage, null, '');
-            }
-        }
+                    };
+                    reader.readAsDataURL(file);
+                    } 
+                    //Otherwise save the progress report without the file.
+                    else {
+                    saveProgressWithFile(progressMessage, null, '');
+                    }
+                }
+                    function saveProgressWithFile(progressMessage, fileData, fileName) {
+                    const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
+                    const now = new Date();
+                    const progressReport = {
+                    employee: employee,
+                    date: now.toLocaleDateString(),
+                    time: now.toLocaleTimeString(),
+                    details: progressMessage,
+                    fileName: fileName,
+                    fileData: fileData,
+                    status: 'Pending'
+                    };
+                    //Get existing progress reports and add a new one.
+                    let progressReports = JSON.parse(localStorage.getItem('progressReports')) || [];
+                    progressReports.push(progressReport);
+                    //Save the progree report to localStorage.
+                     localStorage.setItem('progressReports', JSON.stringify(progressReports));
+                    // Clear form
+                    document.getElementById('progressMessage').value = '';
+                    document.getElementById('progressFile').value = '';
+                    document.getElementById('fileName').textContent = '';
+                    //Alert for successful submission for the progress report
+                    alert('Progress report submitted successfully!');
+                    loadEmployeeProgress();
+                }
 
-        function saveProgressWithFile(progressMessage, fileData, fileName) {
-            const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-            const now = new Date();
-            
-            const progressReport = {
-                employee: employee,
-                date: now.toLocaleDateString(),
-                time: now.toLocaleTimeString(),
-                details: progressMessage,
-                fileName: fileName,
-                fileData: fileData,
-                status: 'Pending'
-            };
-
-            // Get existing progress reports
-            let progressReports = JSON.parse(localStorage.getItem('progressReports')) || [];
-            progressReports.push(progressReport);
-            
-            // Save to localStorage
-            localStorage.setItem('progressReports', JSON.stringify(progressReports));
-
-            // Clear form
-            document.getElementById('progressMessage').value = '';
-            document.getElementById('progressFile').value = '';
-            document.getElementById('fileName').textContent = '';
-
-            // Show success message
-            alert('Progress report submitted successfully!');
-
-            // Refresh the progress list
-            loadEmployeeProgress();
-        }
-
-        function loadEmployeeProgress() {
-            const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-            const progressReports = JSON.parse(localStorage.getItem('progressReports')) || [];
-            const tableBody = document.getElementById('employeeProgressTable');
-            
-            if (!tableBody) return; // Return if not on progress page
-            
-            tableBody.innerHTML = '';
-
-            // Filter and sort progress reports for current employee
-            progressReports
-                .filter(report => report.employee === employee)
-                .sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time))
-                .forEach(report => {
+                    function loadEmployeeProgress() {
+                    const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
+                    const progressReports = JSON.parse(localStorage.getItem('progressReports')) || [];
+                    const tableBody = document.getElementById('employeeProgressTable');
+                    if (!tableBody) return; //Return/come out of the function if not on progress page.
+                    tableBody.innerHTML = '';
+                    // Filter and sort progress reports for current employee
+                    progressReports
+                    .filter(report => report.employee === employee)
+                    .sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time))
+                    .forEach(report => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${report.date}</td>
@@ -1019,21 +932,18 @@
                         <td>${report.status}</td>
                     `;
                     tableBody.appendChild(row);
-                });
-        }
-
-        function loadAdminProgressReports(selectedUser = '') {
-            const progressReports = JSON.parse(localStorage.getItem('progressReports')) || [];
-            const tableBody = document.getElementById('adminProgressTable');
-            if (!tableBody) return; // Return if not on admin progress page
-            
-            tableBody.innerHTML = '';
-
-            // Filter and sort progress reports
-            progressReports
-                .filter(report => !selectedUser || report.employee === selectedUser)
-                .sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time))
-                .forEach(report => {
+                    });
+                }
+                    function loadAdminProgressReports(selectedUser = '') {
+                    const progressReports = JSON.parse(localStorage.getItem('progressReports')) || [];
+                    const tableBody = document.getElementById('adminProgressTable');
+                    if (!tableBody) return;
+                    tableBody.innerHTML = '';
+                    //Filter and sort progress reports Admin Page.
+                    progressReports
+                    .filter(report => !selectedUser || report.employee === selectedUser)
+                    .sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time))
+                    .forEach(report => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${report.employee}</td>
@@ -1052,24 +962,20 @@
                     tableBody.appendChild(row);
                 });
         }
-
-        function downloadFile(fileName, fileData) {
+            function downloadFile(fileName, fileData) {
             if (!fileData) {
                 alert('File data not available');
                 return;
             }
-
             // Create a link element
             const link = document.createElement('a');
             link.href = fileData;
             link.download = fileName;
-            
             // Append to body, click, and remove
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
-
         function updateProgressStatus(datetime, newStatus) {
             let progressReports = JSON.parse(localStorage.getItem('progressReports')) || [];
             
@@ -1107,84 +1013,152 @@
             }
         }
         function loadAdminHolidayRequests(selectedUser = '') {
-            const requests = JSON.parse(localStorage.getItem('holidayRequests')) || [];
-            const tableBody = document.getElementById('adminHolidayRequestsTable');
-            const statusFilter = document.getElementById('holidayStatusFilter').value;
-            
-            if (!tableBody) {
-                console.error('Admin holiday requests table not found');
-                return;
-            }
-            tableBody.innerHTML = '';
-            let filteredRequests = requests;   
-            if (selectedUser) {
-                filteredRequests = filteredRequests.filter(request => 
-                    request.employee.toLowerCase() === selectedUser.toLowerCase()
-                );
-            }            
-            if (statusFilter !== 'all') {
-                filteredRequests = filteredRequests.filter(request => 
-                    request.status === statusFilter
-                );
-            }     
-            if (filteredRequests.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="7" style="text-align: center;">No holiday requests found</td>';
-                tableBody.appendChild(row);
-                return;
-            }
-                filteredRequests.sort((a, b) => {
-                if (a.status === 'pending' && b.status !== 'pending') return -1;
-                if (a.status !== 'pending' && b.status === 'pending') return 1;
-                return new Date(b.startDate) - new Date(a.startDate);
-            });
-            filteredRequests.forEach((request, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${request.employee}</td>
-                    <td>${request.startDate}</td>
-                    <td>${request.endDate}</td>
-                    <td>${request.days}</td>
-                    <td>${request.reason}</td>
-                    <td><span class="status-${request.status.toLowerCase()}">${(request.status || 'Pending').charAt(0).toUpperCase() + (request.status || 'pending').slice(1)}</span></td>
-                    <td class="action-buttons">
-                        ${request.status === 'pending' ? `
-                            <button class="approve-btn" onclick="updateHolidayStatus(${index}, 'approved')">Approve</button>
-                            <button class="reject-btn" onclick="updateHolidayStatus(${index}, 'rejected')">Reject</button>
-                        ` : ''}
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-        function openTimeTableModal() {
-        document.getElementById('timeTableModal').style.display = 'block';
-    }   
-    function closeTimeTableModal() {
-        document.getElementById('timeTableModal').style.display = 'none';
-    }   
-    function saveTimeTable() {
-        const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-        const checkInTime = document.getElementById('checkInTime').value;
-        const checkOutTime = document.getElementById('checkOutTime').value;       
-        if (!checkInTime || !checkOutTime) {
-            alert('Please set both Check-In and Check-Out times.');
-            return;
-        }       
-        let timeTableRecords = JSON.parse(localStorage.getItem('timeTableRecords')) || [];   
-        timeTableRecords = timeTableRecords.filter(record => record.employee !== employee);
-        timeTableRecords.push({ employee, checkInTime, checkOutTime });       
-        localStorage.setItem('timeTableRecords', JSON.stringify(timeTableRecords));
-        alert('Time Table saved successfully!');
-        closeTimeTableModal();
-        loadAdminTimeTable();
+    const requests = JSON.parse(localStorage.getItem('holidayRequests')) || [];
+    const tableBody = document.getElementById('adminHolidayRequestsTable');
+    const statusFilter = document.getElementById('holidayStatusFilter').value;
+    
+    if (!tableBody) {
+        console.error('Admin holiday requests table not found');
+        return;
     }
-    function loadAdminTimeTable(selectedUser = '') {
-    const timeTableRecords = JSON.parse(localStorage.getItem('timeTableRecords')) || [];
-    const tableBody = document.getElementById('adminTimeTableBody');
-    if (!tableBody) return;
 
     tableBody.innerHTML = '';
+
+    let filteredRequests = requests;   
+    if (selectedUser) {
+        filteredRequests = filteredRequests.filter(request => 
+            request.employee.toLowerCase() === selectedUser.toLowerCase()
+        );
+    }            
+    if (statusFilter !== 'all') {
+        filteredRequests = filteredRequests.filter(request => 
+            request.status === statusFilter
+        );
+    }     
+
+    if (filteredRequests.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="7" style="text-align: center;">No holiday requests found</td>';
+        tableBody.appendChild(row);
+        return;
+    }
+
+    filteredRequests.forEach((request, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${request.employee}</td>
+            <td>${request.startDate}</td>
+            <td>${request.endDate}</td>
+            <td>${request.days}</td>
+            <td>${request.reason}</td>
+            <td><span class="status-${request.status.toLowerCase()}">${(request.status || 'Pending').charAt(0).toUpperCase() + (request.status || 'pending').slice(1)}</span></td>
+            <td class="action-buttons">
+                ${request.status === 'pending' ? `
+                    <button class="approve-btn" data-id="${request.id}">Approve</button>
+                    <button class="reject-btn" data-id="${request.id}">Reject</button>
+                ` : ''}
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+    function updateHolidayStatus(requestId, newStatus) {
+    let requests = JSON.parse(localStorage.getItem('holidayRequests')) || [];
+
+    // Find the request by ID
+    let requestIndex = requests.findIndex(req => req.id == requestId);
+    if (requestIndex === -1) {
+        alert("Request not found!");
+        return;
+    }
+
+    // Update the status
+    requests[requestIndex].status = newStatus;
+
+    // Save back to localStorage
+    localStorage.setItem('holidayRequests', JSON.stringify(requests));
+
+    // Refresh the table
+    loadAdminHolidayRequests();
+
+    alert(`Holiday request has been ${newStatus}`);
+}
+
+
+    // Attach event listeners to approve and reject buttons
+    document.querySelectorAll('.approve-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            updateHolidayStatus(button.dataset.id, 'approved');
+        });
+    });
+
+    document.querySelectorAll('.reject-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            updateHolidayStatus(button.dataset.id, 'rejected');
+        });
+    });
+}
+function saveHolidayRequest() {
+    const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const reason = document.getElementById('reason').value;
+    
+    if (!startDate || !endDate || !reason) {
+        alert('Please fill all fields');
+        return;
+    }
+    let holidayRequests = JSON.parse(localStorage.getItem('holidayRequests')) || [];
+    const requestId = new Date().getTime(); 
+    holidayRequests.push({
+        id: requestId,
+        employee: employee,
+        startDate: startDate,
+        endDate: endDate,
+        days: calculateDaysBetweenDates(startDate, endDate),
+        reason: reason,
+        status: 'pending'
+    });
+    localStorage.setItem('holidayRequests', JSON.stringify(holidayRequests));
+    alert('Holiday request submitted successfully!');
+}
+function openTimeTableModal() {
+    document.getElementById('timeTableModal').style.display = 'block';
+    document.getElementById('modalOverlay').style.display = 'block';
+}
+function closeTimeTableModal() {
+    document.getElementById('timeTableModal').style.display = 'none';
+    document.getElementById('modalOverlay').style.display = 'none';
+}
+function saveTimeTable() {
+    const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
+    const checkInTime = document.getElementById('checkInTime').value;
+    const checkOutTime = document.getElementById('checkOutTime').value;
+    if (!checkInTime || !checkOutTime) {
+        alert('Please set both Check-In and Check-Out times.');
+        return;
+    }
+    let timeTableRecords = JSON.parse(localStorage.getItem('timeTableRecords')) || [];
+    timeTableRecords = timeTableRecords.filter(record => record.employee !== employee);
+    timeTableRecords.push({ employee, checkInTime, checkOutTime });
+    localStorage.setItem('timeTableRecords', JSON.stringify(timeTableRecords));
+    alert('Time Table saved successfully!');
+    closeTimeTableModal();
+    loadAdminTimeTable();  // Ensure the table updates immediately
+}
+function loadAdminTimeTable(selectedUser = '') {
+    console.log("Loading Time Table for:", selectedUser);    
+    const timeTableRecords = JSON.parse(localStorage.getItem('timeTableRecords')) || [];
+    console.log("Retrieved Time Table Records:", timeTableRecords);
+    const tableBody = document.getElementById('adminTimeTableBody');
+    if (!tableBody) {
+        console.error("Time Table body not found in DOM");
+        return;
+    }
+    tableBody.innerHTML = ''; // Clear previous data
+    if (timeTableRecords.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="3">No time table data found</td></tr>';
+        return;
+    }
     timeTableRecords
         .filter(record => !selectedUser || record.employee === selectedUser)
         .forEach(record => {
@@ -1207,7 +1181,7 @@ function showAdminSection(sectionName) {
     if (selectedSection) {
         selectedSection.style.display = 'block';
         const selectedUser = document.getElementById('adminUserSelect')?.value || '';
-        switch(sectionName) {
+        switch (sectionName) {
             case 'adminAttendance':
                 loadAdminData(selectedUser);
                 break;
@@ -1222,7 +1196,12 @@ function showAdminSection(sectionName) {
                 break;
         }
     }
-}
+    }
+        function logout() {
+            showPage('loginPage');
+            document.getElementById('userName').value = '';
+            document.getElementById('userPassword').value = '';
+        }
     </script>
 </body>
 </html>
