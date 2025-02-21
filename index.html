@@ -180,35 +180,6 @@
                 </div>
             </div>
         </div>
-        <!---Employee Page Summary Section-->
-        <div class="summary-section">
-            <div class="summary-subsection">
-                <h3>Present Summary</h3>
-                <div class="summary-item">
-                    <h4>Total Check-Ins</h4>
-                    <p id="totalCheckIns">0</p>
-                </div>
-                <div class="summary-item">
-                    <h4>Total Check-Outs</h4>
-                    <p id="totalCheckOuts">0</p>
-                </div>
-                <div class="summary-item">
-                    <h4>Late Check-Ins</h4>
-                    <p id="lateCheckIns">0</p>
-                </div>
-            </div>
-            <div class="summary-subsection">
-                <h3>Not Present Summary</h3>
-                <div class="summary-item">
-                    <h4>Total Absences</h4>
-                    <p id="totalAbsences">0</p>
-                </div>
-                <div class="summary-item">
-                    <h4>Unapproved Leaves</h4>
-                    <p id="unapprovedLeaves">0</p>
-                </div>
-            </div>
-        </div>
         <div class="container">
             <div class="left-sidebar">
                 <button onclick="showSection('attendance')">Check In/Out</button>
@@ -975,7 +946,7 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        }
+        } 
         function updateProgressStatus(datetime, newStatus) {
             let progressReports = JSON.parse(localStorage.getItem('progressReports')) || [];
             
