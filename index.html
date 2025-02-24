@@ -1545,7 +1545,6 @@ function loadAdminTimeTable(selectedUser = '') {
     const timeTable = timeTables.find(t => t.employee === selectedUser);
     if (!timeTable) {
         const row = document.createElement('tr');
-        row.innerHTML = '<td colspan="4" style="text-align: center;">No time table found for selected user</td>';
         tableBody.appendChild(row);
         return;
     }
