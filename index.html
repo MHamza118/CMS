@@ -151,6 +151,254 @@
             z-index: 1000;
             width: 200px;
         }
+        .summary-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .summary-item {
+            flex: 1;
+            text-align: center;
+        }
+        .summary-item h4 {
+            margin: 0;
+            color: #495057;
+            font-size: 14px;
+        }
+        .summary-item p {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .summary-row.values .summary-item {
+            padding: 10px;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .download-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .download-btn:hover {
+            background-color: #45a049;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            width: 90%;
+            max-width: 600px;
+        }
+        .modal-content .close {
+            position: absolute;
+            right: 20px;
+            font-size: 33px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            line-height: 1;
+            background-color: #e74c3c;
+            border-radius: 20%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding-top: 2px;
+        }
+        .modal-content .close:hover {
+            background-color: #c0392b;
+        }
+        .modal-content h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .modal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .modal-content th {
+            background: linear-gradient(135deg, #2596be 0%, #1c7593 100%);
+            color: white !important;
+            font-weight: 600 !important;
+            padding: 16px !important;
+            text-align: left;
+        }
+        .modal-content td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .modal-content tr:last-child td {
+            border-bottom: none;
+        }
+        .modal-content input[type="time"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+        .modal-content button {
+            background: linear-gradient(135deg, #2596be 0%, #1c7593 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+        .modal-content button:hover {
+            opacity: 0.9;
+        }
+        #timeTableSettings {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+        #timeTableSettings th,
+        #timeTableSettings td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        #timeTableSettings th {
+            background-color: #f5f5f5;
+        }
+        #timeTableSettings input[type="time"] {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #adminTimeTable {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+        #adminTimeTable th,
+        #adminTimeTable td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        #adminTimeTable th {
+            background-color: #f5f5f5;
+        }
+        .admin-timetable-section {
+            margin-top: 20px;
+        }
+        .admin-timetable-section .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .admin-timetable-section .section-header h2 {
+            margin: 0;
+        }
+        .admin-timetable-section .section-header .selected-employee {
+            font-size: 16px;
+            color: #666;
+        }
+        .admin-timetable-section .timetable-container {
+            overflow-x: auto;
+        }
+        .admin-timetable {
+            min-width: 600px;
+        }
+        .admin-timetable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .admin-timetable thead th {
+            background: linear-gradient(135deg, #2596be 0%, #1c7593 100%);
+            color: white !important;
+            font-weight: 600 !important;
+            padding: 16px !important;
+            text-align: left;
+            font-size: 14px;
+        }
+        .admin-timetable tbody td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+            background-color: #f8f9fa;
+        }
+        .admin-timetable tbody tr:nth-child(even) td {
+            background-color: #ffffff;
+        }
+        .admin-timetable tbody tr:hover td {
+            background-color: #e3f2fd;
+        }
+        .admin-timetable tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .admin-timetable-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .admin-timetable-section .section-header {
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #2596be 0%, #1c7593 100%);
+            margin: -20px -20px 20px -20px;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            color: white;
+        }
+        .admin-timetable-section .section-header h2 {
+            color: white;
+            font-size: 1.5em;
+            margin: 0;
+            font-weight: 600;
+        }
+        .admin-timetable-section .section-header .selected-employee {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -180,6 +428,42 @@
                 </div>
             </div>
         </div>
+        <div class="summary-section">
+            <div class="summary-row headings">
+                <div class="summary-item">
+                    <h4>Total Check-Ins</h4>
+                </div>
+                <div class="summary-item">
+                    <h4>Total Check-Outs</h4>
+                </div>
+                <div class="summary-item">
+                    <h4>Late Check-Ins</h4>
+                </div>
+                <div class="summary-item">
+                    <h4>Total Absences</h4>
+                </div>
+                <div class="summary-item">
+                    <h4>Unapproved Leaves</h4>
+                </div>
+            </div>
+            <div class="summary-row values">
+                <div class="summary-item">
+                    <p id="totalCheckIns">0</p>
+                </div>
+                <div class="summary-item">
+                    <p id="totalCheckOuts">0</p>
+                </div>
+                <div class="summary-item">
+                    <p id="lateCheckIns">0</p>
+                </div>
+                <div class="summary-item">
+                    <p id="totalAbsences">0</p>
+                </div>
+                <div class="summary-item">
+                    <p id="unapprovedLeaves">0</p>
+                </div>
+            </div>
+        </div>
         <div class="container">
             <div class="left-sidebar">
                 <button onclick="showSection('attendance')">Check In/Out</button>
@@ -191,16 +475,51 @@
              <!-- Dark overlay -->
             <div id="modalOverlay" onclick="closeTimeTableModal()"></div>
             <!-- Time Table Modal -->
-            <div id="timeTableModal">
-            <h2>Set Your Time Table</h2>
-            <label for="checkInTime">Check-In Time:</label>
-            <input type="time" id="checkInTime">
-            <br>
-            <label for="checkOutTime">Check-Out Time:</label>
-            <input type="time" id="checkOutTime">
-            <br><br>
-            <button onclick="saveTimeTable()">Save</button>
-            <button class="close-btn" onclick="closeTimeTableModal()">Close</button>
+            <div class="modal-content" id="timeTableContent">
+                <span class="close" onclick="closeTimeTableModal()">&times;</span>
+                <h2>Set Your Time Table </h2>
+                <table id="timeTableSettings">
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Monday</td>
+                            <td><input type="time" id="mondayCheckIn"></td>
+                            <td><input type="time" id="mondayCheckOut"></td>
+                        </tr>
+                        <tr>
+                            <td>Tuesday</td>
+                            <td><input type="time" id="tuesdayCheckIn"></td>
+                            <td><input type="time" id="tuesdayCheckOut"></td>
+                        </tr>
+                        <tr>
+                            <td>Wednesday</td>
+                            <td><input type="time" id="wednesdayCheckIn"></td>
+                            <td><input type="time" id="wednesdayCheckOut"></td>
+                        </tr>
+                        <tr>
+                            <td>Thursday</td>
+                            <td><input type="time" id="thursdayCheckIn"></td>
+                            <td><input type="time" id="thursdayCheckOut"></td>
+                        </tr>
+                        <tr>
+                            <td>Friday</td>
+                            <td><input type="time" id="fridayCheckIn"></td>
+                            <td><input type="time" id="fridayCheckOut"></td>
+                        </tr>
+                        <tr>
+                            <td>Saturday</td>
+                            <td><input type="time" id="saturdayCheckIn"></td>
+                            <td><input type="time" id="saturdayCheckOut"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button onclick="saveTimeTable()">Save</button>
             </div>
             <div class="main-content">
                 <div class="employee-header">
@@ -230,8 +549,7 @@
                 <div id="progress-section" class="section" style="display: none;">
                     <h2>Submit Daily Progress</h2>
                     <div class="form-group">
-                        <label for="progressMessage">Progress Details:</label>
-                        <textarea id="progressMessage" rows="4" required></textarea>
+                        <textarea id="progressMessage" rows="4" required placeholder="Enter your progress details here..."></textarea>
                     </div>
                     <div class="file-upload-container">
                         <label for="progressFile" class="file-upload-label">
@@ -353,20 +671,63 @@
                     </div>
                 </div>
                 <!-- Time Table Section -->
-                <div id="adminTimeTable" style="display: none;">
-                <h2>Employee Time Table</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Employee</th>
-                            <th>Check-In Time</th>
-                            <th>Check-Out Time</th>
-                        </tr>
-                    </thead>
-                    <tbody id="adminTimeTableBody"></tbody>
-                </table>
-            </div>
-            <!--Admin Progress Report Section-->
+                <div id="adminTimeTable" style="display: none;" class="admin-timetable-section">
+                    <div class="section-header">
+                        <h2>Employee Time Table</h2>
+                        <p class="selected-employee">Viewing schedule for: <span id="selectedEmployeeName">No employee selected</span></p>
+                    </div>
+                    <div class="timetable-container">
+                        <table class="admin-timetable">
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Check In Time</th>
+                                    <th>Check Out Time</th>
+                                    <th>Working Hours</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminTimeTableBody">
+                                <tr>
+                                    <td>Monday</td>
+                                    <td id="adminMondayCheckIn">-</td>
+                                    <td id="adminMondayCheckOut">-</td>
+                                    <td id="adminMondayHours">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Tuesday</td>
+                                    <td id="adminTuesdayCheckIn">-</td>
+                                    <td id="adminTuesdayCheckOut">-</td>
+                                    <td id="adminTuesdayHours">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Wednesday</td>
+                                    <td id="adminWednesdayCheckIn">-</td>
+                                    <td id="adminWednesdayCheckOut">-</td>
+                                    <td id="adminWednesdayHours">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Thursday</td>
+                                    <td id="adminThursdayCheckIn">-</td>
+                                    <td id="adminThursdayCheckOut">-</td>
+                                    <td id="adminThursdayHours">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Friday</td>
+                                    <td id="adminFridayCheckIn">-</td>
+                                    <td id="adminFridayCheckOut">-</td>
+                                    <td id="adminFridayHours">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Saturday</td>
+                                    <td id="adminSaturdayCheckIn">-</td>
+                                    <td id="adminSaturdayCheckOut">-</td>
+                                    <td id="adminSaturdayHours">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!--Admin Progress Report Section-->
                 <div id="adminProgress" style="display: none;">
                     <h2>Employee Progress Reports</h2>
                     <table>
@@ -377,6 +738,7 @@
                                 <th>Time</th>
                                 <th>Details</th>
                                 <th>File</th>
+                                <th>Download</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -445,6 +807,9 @@
             ['loginPage', 'employeePage', 'adminPage'].forEach(id => {
                 document.getElementById(id).style.display = id === pageId ? 'block' : 'none';
             });
+            if (pageId === 'employeePage') {
+                updateSummaryValues();
+            }
         }
 
         // Date & Time Display
@@ -535,6 +900,7 @@
             localStorage.setItem('lateCheckIns', JSON.stringify(lateCheckIns));
             alert('Late check-in recorded successfully!');
             loadAttendanceTable();
+            updateSummaryValues();
         }
         function handleCheckOut() {
             const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
@@ -544,6 +910,7 @@
             //ALert for a successful check out.
             alert('Check-out successful! Time recorded: ' + time);
             clearNotifications();
+            updateSummaryValues(); // Add this line to update the summary after check-out
         }
         function addAttendanceRecord(type) {
             const now = new Date();
@@ -590,6 +957,7 @@
                 const selectedUser = document.getElementById('adminUserSelect')?.value || '';
                 loadAdminData(selectedUser);
             }
+            updateSummaryValues();
         }
         function loadAttendanceTable() {
             const attendanceTable = document.getElementById('attendanceTable');
@@ -643,7 +1011,8 @@
                         }
                     }
                 });
-            }
+            updateSummaryValues();
+        }
             //Record and Update the MISSED CHECKIN section.
             function recordMissedCheckIn() {
             const now = new Date();
@@ -674,7 +1043,7 @@
             }
                 // Automatically send notification to the employee for missed checkin.
                 sendNotification(employee);
-                }
+            }
                 //Function to send notification to the employee for missed checkins and update the notification count.
                 function sendNotification(employee) {
                 const notificationCount = document.getElementById('notificationCount');
@@ -716,8 +1085,12 @@
                 // Admin Page functions
                 function handleUserSelect() {
                 const selectedUser = document.getElementById('adminUserSelect').value;
-                showAdminSection('adminAttendance');
+                document.getElementById('selectedEmployeeName').textContent = selectedUser || 'No employee selected';
                 loadAdminData(selectedUser);
+                loadMissedCheckIns(selectedUser);
+                loadAdminProgressReports(selectedUser);
+                loadAdminTimeTable(selectedUser);
+                loadAdminHolidayRequests(selectedUser);
                 }
 
                 function loadAdminData(selectedUser = '') {
@@ -874,10 +1247,12 @@
                     progressReports.push(progressReport);
                     //Save the progree report to localStorage.
                      localStorage.setItem('progressReports', JSON.stringify(progressReports));
+
                     // Clear form
                     document.getElementById('progressMessage').value = '';
                     document.getElementById('progressFile').value = '';
                     document.getElementById('fileName').textContent = '';
+
                     //Alert for successful submission for the progress report
                     alert('Progress report submitted successfully!');
                     loadEmployeeProgress();
@@ -894,15 +1269,16 @@
                     .filter(report => report.employee === employee)
                     .sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time))
                     .forEach(report => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${report.date}</td>
-                        <td>${report.time}</td>
-                        <td>${report.details}</td>
-                        <td>${report.fileName}</td>
-                        <td>${report.status}</td>
-                    `;
-                    tableBody.appendChild(row);
+                        const statusClass = report.status.toLowerCase();
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${report.date}</td>
+                            <td>${report.time}</td>
+                            <td>${report.details}</td>
+                            <td>${report.fileName || 'No file'}</td>
+                            <td class="status-${statusClass}">${report.status}</td>
+                        `;
+                        tableBody.appendChild(row);
                     });
                 }
                     function loadAdminProgressReports(selectedUser = '') {
@@ -915,13 +1291,17 @@
                     .filter(report => !selectedUser || report.employee === selectedUser)
                     .sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time))
                     .forEach(report => {
+                    const fileDownloadButton = report.fileData ? 
+                        `<button onclick="downloadFile('${report.fileName}', '${report.fileData}')" class="download-btn">Download</button>` : 
+                        'No file';
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${report.employee}</td>
                         <td>${report.date}</td>
                         <td>${report.time}</td>
                         <td>${report.details}</td>
-                        <td>${report.fileName}</td>
+                        <td>${report.fileName ? report.fileName : 'No file'}</td>
+                        <td>${fileDownloadButton}</td>
                         <td>
                             <select onchange="updateProgressStatus('${report.date} ${report.time}', this.value)">
                                 <option value="Pending" ${report.status === 'Pending' ? 'selected' : ''}>Pending</option>
@@ -938,30 +1318,29 @@
                 alert('File data not available');
                 return;
             }
-            // Create a link element
             const link = document.createElement('a');
             link.href = fileData;
             link.download = fileName;
-            // Append to body, click, and remove
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         } 
         function updateProgressStatus(datetime, newStatus) {
-            let progressReports = JSON.parse(localStorage.getItem('progressReports')) || [];
-            
-            // Find and update the specific report
-            const report = progressReports.find(r => 
-                (r.date + ' ' + r.time) === datetime
-            );           
-            if (report) {
-                report.status = newStatus;
+            const progressReports = JSON.parse(localStorage.getItem('progressReports')) || [];
+            const [date, time] = datetime.split(' ');
+            const reportIndex = progressReports.findIndex(report => 
+                report.date === date && report.time === time
+            );          
+            if (reportIndex !== -1) {
+                progressReports[reportIndex].status = newStatus;
                 localStorage.setItem('progressReports', JSON.stringify(progressReports));
-                alert(`Status updated to ${newStatus}`);
+                // Refresh both admin and employee views
+                loadAdminProgressReports(document.getElementById('adminUserSelect').value);
+                loadEmployeeProgress();
             }
         }
         function showAdminSection(sectionName) {
-            const sections = ['adminAttendance', 'adminProgress', 'adminHolidays'];
+            const sections = ['adminAttendance', 'adminProgress', 'adminHolidays', 'adminTimeTable'];
             sections.forEach(section => {
                 const element = document.getElementById(section);
                 if (element) element.style.display = 'none';
@@ -980,25 +1359,25 @@
                     case 'adminHolidays':
                         loadAdminHolidayRequests(selectedUser);
                         break;
+                    case 'adminTimeTable':
+                        loadAdminTimeTable(selectedUser);
+                        break;
                 }
             }
         }
         function loadAdminHolidayRequests(selectedUser = '') {
     const requests = JSON.parse(localStorage.getItem('holidayRequests')) || [];
     const tableBody = document.getElementById('adminHolidayRequestsTable');
-    const statusFilter = document.getElementById('holidayStatusFilter').value;
-    
+    const statusFilter = document.getElementById('holidayStatusFilter').value;   
     if (!tableBody) {
         console.error('Admin holiday requests table not found');
         return;
     }
-
     tableBody.innerHTML = '';
-
     let filteredRequests = requests;   
     if (selectedUser) {
         filteredRequests = filteredRequests.filter(request => 
-            request.employee.toLowerCase() === selectedUser.toLowerCase()
+            request.employeeName === selectedUser || request.employee === selectedUser
         );
     }            
     if (statusFilter !== 'all') {
@@ -1006,18 +1385,16 @@
             request.status === statusFilter
         );
     }     
-
     if (filteredRequests.length === 0) {
         const row = document.createElement('tr');
         row.innerHTML = '<td colspan="7" style="text-align: center;">No holiday requests found</td>';
         tableBody.appendChild(row);
         return;
     }
-
     filteredRequests.forEach((request, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${request.employee}</td>
+            <td>${request.employeeName || request.employee}</td>
             <td>${request.startDate}</td>
             <td>${request.endDate}</td>
             <td>${request.days}</td>
@@ -1034,28 +1411,18 @@
     });
     function updateHolidayStatus(requestId, newStatus) {
     let requests = JSON.parse(localStorage.getItem('holidayRequests')) || [];
-
-    // Find the request by ID
     let requestIndex = requests.findIndex(req => req.id == requestId);
     if (requestIndex === -1) {
         alert("Request not found!");
         return;
     }
-
     // Update the status
     requests[requestIndex].status = newStatus;
-
-    // Save back to localStorage
     localStorage.setItem('holidayRequests', JSON.stringify(requests));
-
-    // Refresh the table
     loadAdminHolidayRequests();
-
     alert(`Holiday request has been ${newStatus}`);
 }
-
-
-    // Attach event listeners to approve and reject buttons
+    //Adding event listeners to approve and reject buttons for ADMIN Holiday Requests Section.
     document.querySelectorAll('.approve-btn').forEach(button => {
         button.addEventListener('click', () => {
             updateHolidayStatus(button.dataset.id, 'approved');
@@ -1082,7 +1449,7 @@ function saveHolidayRequest() {
     const requestId = new Date().getTime(); 
     holidayRequests.push({
         id: requestId,
-        employee: employee,
+        employeeName: employee,
         startDate: startDate,
         endDate: endDate,
         days: calculateDaysBetweenDates(startDate, endDate),
@@ -1093,54 +1460,112 @@ function saveHolidayRequest() {
     alert('Holiday request submitted successfully!');
 }
 function openTimeTableModal() {
-    document.getElementById('timeTableModal').style.display = 'block';
+    const modal = document.getElementById('timeTableContent');
+    const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
+    const timeTables = JSON.parse(localStorage.getItem('timeTables')) || [];
+    const timeTable = timeTables.find(t => t.employee === employee) || {};            
+    // Load existing values if they exist
+    if (timeTable.monday) {
+        document.getElementById('mondayCheckIn').value = timeTable.monday.checkIn;
+        document.getElementById('mondayCheckOut').value = timeTable.monday.checkOut;
+    }
+    if (timeTable.tuesday) {
+        document.getElementById('tuesdayCheckIn').value = timeTable.tuesday.checkIn;
+        document.getElementById('tuesdayCheckOut').value = timeTable.tuesday.checkOut;
+    }
+    if (timeTable.wednesday) {
+        document.getElementById('wednesdayCheckIn').value = timeTable.wednesday.checkIn;
+        document.getElementById('wednesdayCheckOut').value = timeTable.wednesday.checkOut;
+    }
+    if (timeTable.thursday) {
+        document.getElementById('thursdayCheckIn').value = timeTable.thursday.checkIn;
+        document.getElementById('thursdayCheckOut').value = timeTable.thursday.checkOut;
+    }
+    if (timeTable.friday) {
+        document.getElementById('fridayCheckIn').value = timeTable.friday.checkIn;
+        document.getElementById('fridayCheckOut').value = timeTable.friday.checkOut;
+    }
+    if (timeTable.saturday) {
+        document.getElementById('saturdayCheckIn').value = timeTable.saturday.checkIn;
+        document.getElementById('saturdayCheckOut').value = timeTable.saturday.checkOut;
+    }           
+    modal.style.display = 'block';
     document.getElementById('modalOverlay').style.display = 'block';
-}
-function closeTimeTableModal() {
-    document.getElementById('timeTableModal').style.display = 'none';
-    document.getElementById('modalOverlay').style.display = 'none';
 }
 function saveTimeTable() {
     const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-    const checkInTime = document.getElementById('checkInTime').value;
-    const checkOutTime = document.getElementById('checkOutTime').value;
-    if (!checkInTime || !checkOutTime) {
-        alert('Please set both Check-In and Check-Out times.');
-        return;
-    }
-    let timeTableRecords = JSON.parse(localStorage.getItem('timeTableRecords')) || [];
-    timeTableRecords = timeTableRecords.filter(record => record.employee !== employee);
-    timeTableRecords.push({ employee, checkInTime, checkOutTime });
-    localStorage.setItem('timeTableRecords', JSON.stringify(timeTableRecords));
-    alert('Time Table saved successfully!');
+    const timeTable = {
+        employee: employee,
+        monday: {
+            checkIn: document.getElementById('mondayCheckIn').value,
+            checkOut: document.getElementById('mondayCheckOut').value
+        },
+        tuesday: {
+            checkIn: document.getElementById('tuesdayCheckIn').value,
+            checkOut: document.getElementById('tuesdayCheckOut').value
+        },
+        wednesday: {
+            checkIn: document.getElementById('wednesdayCheckIn').value,
+            checkOut: document.getElementById('wednesdayCheckOut').value
+        },
+        thursday: {
+            checkIn: document.getElementById('thursdayCheckIn').value,
+            checkOut: document.getElementById('thursdayCheckOut').value
+        },
+        friday: {
+            checkIn: document.getElementById('fridayCheckIn').value,
+            checkOut: document.getElementById('fridayCheckOut').value
+        },
+        saturday: {
+            checkIn: document.getElementById('saturdayCheckIn').value,
+            checkOut: document.getElementById('saturdayCheckOut').value
+        }
+    };
+    // Get existing time tables
+    let timeTables = JSON.parse(localStorage.getItem('timeTables')) || [];           
+    // Remove existing time table for this employee if it exists
+    timeTables = timeTables.filter(t => t.employee !== employee);           
+    timeTables.push(timeTable);            
+    localStorage.setItem('timeTables', JSON.stringify(timeTables));
     closeTimeTableModal();
-    loadAdminTimeTable();  // Ensure the table updates immediately
+    alert('Time table saved successfully!');
 }
 function loadAdminTimeTable(selectedUser = '') {
-    console.log("Loading Time Table for:", selectedUser);    
-    const timeTableRecords = JSON.parse(localStorage.getItem('timeTableRecords')) || [];
-    console.log("Retrieved Time Table Records:", timeTableRecords);
+    const timeTables = JSON.parse(localStorage.getItem('timeTables')) || [];
     const tableBody = document.getElementById('adminTimeTableBody');
-    if (!tableBody) {
-        console.error("Time Table body not found in DOM");
+    if (!tableBody) return;
+    // If no user is selected, show a message
+    if (!selectedUser) {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="4" style="text-align: center;">Please select a user to view their time table</td>';
+        tableBody.appendChild(row);
         return;
     }
-    tableBody.innerHTML = ''; // Clear previous data
-    if (timeTableRecords.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="3">No time table data found</td></tr>';
+    // Find the time table for the selected user
+    const timeTable = timeTables.find(t => t.employee === selectedUser);
+    if (!timeTable) {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="4" style="text-align: center;">No time table found for selected user</td>';
+        tableBody.appendChild(row);
         return;
     }
-    timeTableRecords
-        .filter(record => !selectedUser || record.employee === selectedUser)
-        .forEach(record => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${record.employee}</td>
-                <td>${record.checkInTime}</td>
-                <td>${record.checkOutTime}</td>
-            `;
-            tableBody.appendChild(row);
-        });
+    tableBody.innerHTML = '';
+    // Populate the time table
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    days.forEach(day => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${day.charAt(0).toUpperCase() + day.slice(1)}</td>
+            <td>${formatTimeToAMPM(timeTable[day].checkIn)}</td>
+            <td>${formatTimeToAMPM(timeTable[day].checkOut)}</td>
+            <td>${calculateWorkingHours(timeTable[day].checkIn, timeTable[day].checkOut)}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+function closeTimeTableModal() {
+    document.getElementById('timeTableContent').style.display = 'none';
+    document.getElementById('modalOverlay').style.display = 'none';
 }
 function showAdminSection(sectionName) {
     const sections = ['adminAttendance', 'adminProgress', 'adminHolidays', 'adminTimeTable'];
@@ -1152,7 +1577,7 @@ function showAdminSection(sectionName) {
     if (selectedSection) {
         selectedSection.style.display = 'block';
         const selectedUser = document.getElementById('adminUserSelect')?.value || '';
-        switch (sectionName) {
+        switch(sectionName) {
             case 'adminAttendance':
                 loadAdminData(selectedUser);
                 break;
@@ -1172,6 +1597,119 @@ function showAdminSection(sectionName) {
             showPage('loginPage');
             document.getElementById('userName').value = '';
             document.getElementById('userPassword').value = '';
+        }
+        function formatTimeToAMPM(time) {
+            if (!time) return '-';
+            const [hours, minutes] = time.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const formattedHour = hour % 12 || 12;
+            return `${formattedHour}:${minutes} ${ampm}`;
+        }
+
+        function calculateWorkingHours(checkIn, checkOut) {
+            if (!checkIn || !checkOut) return '-';
+            
+            const [inHours, inMinutes] = checkIn.split(':').map(Number);
+            const [outHours, outMinutes] = checkOut.split(':').map(Number);
+            
+            let inMinutesTotal = inHours * 60 + inMinutes;
+            let outMinutesTotal = outHours * 60 + outMinutes;
+            
+            let diffMinutes;
+            
+            // Calculate the difference, ensuring it's always positive and ≤ 24 hours
+            if (outMinutesTotal >= inMinutesTotal) {
+                diffMinutes = outMinutesTotal - inMinutesTotal;
+            } else {
+                // If checkout is earlier, calculate time until midnight plus time after midnight
+                diffMinutes = (24 * 60) - inMinutesTotal + outMinutesTotal;
+            }
+            diffMinutes = Math.min(diffMinutes, 24 * 60);           
+            const hours = Math.floor(diffMinutes / 60);
+            const minutes = diffMinutes % 60;            
+            return `${hours}h ${minutes}m`;
+        }
+        function updateAdminTimeTable(timeTable) {
+            if (!timeTable) return;           
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            days.forEach(day => {
+                if (timeTable[day]) {
+                    const checkIn = timeTable[day].checkIn;
+                    const checkOut = timeTable[day].checkOut;
+                    document.getElementById(`admin${day.charAt(0).toUpperCase() + day.slice(1)}CheckIn`).textContent = formatTimeToAMPM(checkIn);
+                    document.getElementById(`admin${day.charAt(0).toUpperCase() + day.slice(1)}CheckOut`).textContent = formatTimeToAMPM(checkOut);
+                    document.getElementById(`admin${day.charAt(0).toUpperCase() + day.slice(1)}Hours`).textContent = calculateWorkingHours(checkIn, checkOut);
+                }
+            });
+        }
+        function updateSummaryValues() {
+            const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
+            const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
+            const lateCheckIns = JSON.parse(localStorage.getItem('lateCheckIns')) || [];
+            const holidayRequests = JSON.parse(localStorage.getItem('holidayRequests')) || [];
+            // Filter records for current employee
+            const employeeRecords = attendanceRecords.filter(record => record.employee === employee);
+            const employeeLateCheckins = lateCheckIns.filter(record => record.employee === employee);
+            // Check both employeeName and employee fields for holiday requests
+            const employeeHolidays = holidayRequests.filter(request => 
+                request.employeeName === employee || request.employee === employee
+            );
+            // Calculate totals
+            const totalCheckIns = employeeRecords.filter(record => record.checkIn).length;
+            const totalCheckOuts = employeeRecords.reduce((total, record) => {
+                // If checkOut is an array, add its length
+                if (Array.isArray(record.checkOut)) {
+                    return total + record.checkOut.length;
+                }
+                // If checkOut is a string (old format), count it as 1
+                else if (record.checkOut) {
+                    return total + 1;
+                }
+                return total;
+            }, 0);
+            const totalLateCheckIns = employeeLateCheckins.length;           
+            // Calculate absences
+            const today = new Date();
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();            
+            let totalAbsences = 0;
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(today.getFullYear(), today.getMonth(), day);
+                if (date > today) break;
+                if (date.getDay() === 0 || date.getDay() === 6) continue;  
+                const dateString = date.toLocaleDateString();
+                const hasAttendance = employeeRecords.some(record => record.date === dateString);
+                const hasApprovedLeave = employeeHolidays.some(leave => {
+                    const startDate = new Date(leave.startDate);
+                    const endDate = new Date(leave.endDate);
+                    return startDate <= date && endDate >= date && leave.status === 'approved';
+                });
+                
+                if (!hasAttendance && !hasApprovedLeave) {
+                    totalAbsences++;
+                }
+            }
+            const unapprovedLeaves = employeeHolidays.filter(request => 
+                request.status && request.status.toLowerCase() === 'rejected'
+            ).length;
+            document.getElementById('totalCheckIns').textContent = totalCheckIns;
+            document.getElementById('totalCheckOuts').textContent = totalCheckOuts;
+            document.getElementById('lateCheckIns').textContent = totalLateCheckIns;
+            document.getElementById('totalAbsences').textContent = totalAbsences;
+            document.getElementById('unapprovedLeaves').textContent = unapprovedLeaves;
+        }
+        function calculateWorkingHours(checkIn, checkOut) {
+            if (!checkIn || !checkOut) return 'No Time Table Set For Thid Day';            
+            const [checkInHours, checkInMinutes] = checkIn.split(':').map(Number);
+            const [checkOutHours, checkOutMinutes] = checkOut.split(':').map(Number);           
+            let hours = checkOutHours - checkInHours;
+            let minutes = checkOutMinutes - checkInMinutes;            
+            if (minutes < 0) {
+                hours--;
+                minutes += 60;
+            }           
+            return `${hours}h ${minutes}m`;
         }
     </script>
 </body>
