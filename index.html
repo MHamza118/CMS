@@ -399,6 +399,54 @@
             color: rgba(255, 255, 255, 0.9);
             font-weight: 500;
         }
+        /* Holiday Request Modal Styles */
+        .holiday-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 1001;
+            width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .holiday-modal .section-header {
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #2596be 0%, #1c7593 100%);
+            margin: -20px -20px 20px -20px;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            color: white;
+            position: relative;
+        }
+        .holiday-modal .section-header h2 {
+            color: white;
+            font-size: 1.5em;
+            margin: 0;
+            font-weight: 600;
+        }
+        .holiday-modal .close-btn {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+            opacity: 0.8;
+        }
+        .holiday-modal .close-btn:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -476,7 +524,7 @@
             <div id="modalOverlay" onclick="closeTimeTableModal()"></div>
             <!-- Time Table Modal -->
             <div class="modal-content" id="timeTableContent">
-                <span class="close" onclick="closeTimeTableModal()">&times;</span>
+                <span class="close" onclick="closeTimeTableModal()"><i class="fa-solid fa-xmark"></i></span>
                 <h2>Set Your Time Table </h2>
                 <table id="timeTableSettings">
                     <thead>
@@ -555,8 +603,9 @@
                         <label for="progressFile" class="file-upload-label">
                             <span class="file-icon">📎</span>
                             <span>Attach File</span>
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='%234CAF50' d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E" id="fileUploadedIcon" style="display: none; margin-left: 5px; vertical-align: middle;" alt="File uploaded">
                         </label>
-                        <input type="file" id="progressFile" hidden>
+                        <input type="file" id="progressFile" hidden onchange="handleFileSelect(this)">
                         <span id="fileName"></span>
                     </div>
                     <div class="submit-container">
@@ -775,34 +824,115 @@
             </div>
         </div>
     </div>
+    <!-- Holiday Request Modal -->
+    <div id="holidayModal" class="holiday-modal">
+        <div class="section-header">
+            <h2>Holiday Request</h2>
+            <button onclick="closeHolidayModal()" class="close-btn"><i class="fa-solid fa-xmark" style="background-color: red;"></i></button>
+        </div>
+        <iframe id="holidayFrame" style="width:100%; height:700px; border:none;" src=""></iframe>
+    </div>
+    <div id="modalOverlay" class="modal-overlay"></div>
 
     <script>
+        function updateSummaryValues() {
+            const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
+            const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
+            const lateCheckIns = JSON.parse(localStorage.getItem('lateCheckIns')) || [];
+            const holidayRequests = JSON.parse(localStorage.getItem('holidayRequests')) || [];           
+            // Filter records for current employee
+            const employeeRecords = attendanceRecords.filter(record => record.employee === employee);
+            const employeeLateCheckins = lateCheckIns.filter(record => record.employee === employee);
+            const employeeHolidays = holidayRequests.filter(request => 
+            request.employeeName === employee || request.employee === employee
+            );            
+            // Calculate totals
+            const totalCheckIns = employeeRecords.filter(record => record.checkIn).length;
+            const totalCheckOuts = employeeRecords.reduce((total, record) => {
+                if (Array.isArray(record.checkOut)) {
+                    return total + record.checkOut.length;
+                }
+                else if (record.checkOut) {
+                    return total + 1;
+                }
+                return total;
+            }, 0);
+            const totalLateCheckIns = employeeLateCheckins.length;           
+            // Calculate absences
+            const today = new Date();
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+            let totalAbsences = 0;
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(today.getFullYear(), today.getMonth(), day);
+                if (date > today) break;
+                if (date.getDay() === 0 || date.getDay() === 6) continue;               
+                const dateString = date.toLocaleDateString();
+                const hasAttendance = employeeRecords.some(record => record.date === dateString);
+                const hasApprovedLeave = employeeHolidays.some(leave => {
+                    const startDate = new Date(leave.startDate);
+                    const endDate = new Date(leave.endDate);
+                    return startDate <= date && endDate >= date && leave.status === 'approved';
+                });
+                
+                if (!hasAttendance && !hasApprovedLeave) {
+                    totalAbsences++;
+                }
+            }            
+            const unapprovedLeaves = employeeHolidays.filter(request => 
+            request.status && request.status.toLowerCase() === 'rejected').length;
+            //Update the summary values
+            document.getElementById('totalCheckIns').textContent = totalCheckIns;
+            document.getElementById('totalCheckOuts').textContent = totalCheckOuts;
+            document.getElementById('lateCheckIns').textContent = totalLateCheckIns;
+            document.getElementById('totalAbsences').textContent = totalAbsences;
+            document.getElementById('unapprovedLeaves').textContent = unapprovedLeaves;
+        }
         const users = {
             'admin': { password: 'admin123', role: 'admin' },
             'hamza': { password: 'hamza123', id: '118', role: 'employee', phone: '923480970884' },
             'zain': { password: 'zain123', id: '119', role: 'employee', phone: '9230251866577' },
             'hanzallah': { password: 'hanzallah123', id: '120', role: 'employee', phone: '923474224118' }
         };
-
         //Login Page
-        document.getElementById('loginBtn').addEventListener('click', () => {
-            const username = document.getElementById('userName').value.toLowerCase();
-            const password = document.getElementById('userPassword').value;        
-            const user = users[username];
-            if (user && user.password === password) {
-                if (user.role === 'admin') {
-                    showPage('adminPage');
-                    loadAdminData();
-                } else {
-                    showPage('employeePage');
-                    document.getElementById('employeeDetails').textContent = `${username} | ID: ${user.id}`;
-                    loadAttendanceTable();
-                    loadEmployeeHolidayRequests();
-                }
-            } else {
-                alert('Invalid username or password');
-            }
-        });
+        // Check login state when page loads
+        window.addEventListener('load', () => {
+        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (loggedInUser) {
+        if (loggedInUser.role === 'admin') {
+            showPage('adminPage');
+            loadAdminData();
+        } else {
+            document.getElementById('employeeDetails').textContent = `${loggedInUser.username} | ID: ${loggedInUser.id}`;
+            showPage('employeePage');
+            loadAttendanceTable();
+            updateSummaryValues();
+        }
+    }
+});
+    document.getElementById('loginBtn').addEventListener('click', () => {
+    const username = document.getElementById('userName').value.toLowerCase();
+    const password = document.getElementById('userPassword').value;        
+    const user = users[username];
+    if (user && user.password === password) {
+        localStorage.setItem('loggedInUser', JSON.stringify({
+            username,
+            id: user.id,
+            role: user.role
+        }));        
+        if (user.role === 'admin') {
+            showPage('adminPage');
+            loadAdminData();
+        } else {
+            document.getElementById('employeeDetails').textContent = `${username} | ID: ${user.id}`;
+            showPage('employeePage');
+            loadAttendanceTable();
+            updateSummaryValues();
+        }
+    } else {
+        alert('Invalid username or password');
+    }
+});
         function showPage(pageId) {
             ['loginPage', 'employeePage', 'adminPage'].forEach(id => {
                 document.getElementById(id).style.display = id === pageId ? 'block' : 'none';
@@ -811,7 +941,6 @@
                 updateSummaryValues();
             }
         }
-
         // Date & Time Display
             function updateTime() {
             const now = new Date();
@@ -824,7 +953,6 @@
             });
             document.getElementById('currentTime').textContent = timeString;
             document.getElementById('currentDate').textContent = `${dateString} | ${timeString}`;
-
             // Checking missed check-in after 10:30 AM.
             const currentHour = now.getHours();
             const currentMinutes = now.getMinutes();
@@ -851,8 +979,7 @@
                                 type: 'missed_checkin',
                                 message: 'You forgot to check in for today.'
                             });
-                            localStorage.setItem('notifications', JSON.stringify(notifications));
-                            
+                            localStorage.setItem('notifications', JSON.stringify(notifications));                           
                             // Updating the bell/notification icon
                             const notificationIcon = document.querySelector('.notification-icon');
                             if (notificationIcon) {
@@ -866,7 +993,6 @@
         //Update the clock/Time for every second.
         setInterval(updateTime, 1000);
         updateTime();
-
         // Employee Page Functions.
         function handleCheckIn() {
             const now = new Date();
@@ -958,60 +1084,85 @@
                 loadAdminData(selectedUser);
             }
             updateSummaryValues();
-        }
-        function loadAttendanceTable() {
+            }
+            function loadAttendanceTable() {
             const attendanceTable = document.getElementById('attendanceTable');
             const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
             const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
-            const lateCheckIns = JSON.parse(localStorage.getItem('lateCheckIns')) || [];
-            attendanceTable.innerHTML = '';
-            // Filter and display attendance records
+            const lateCheckIns = JSON.parse(localStorage.getItem('lateCheckIns')) || [];           
+            // Create a map of dates to combine regular and late check-ins
+            const dateMap = new Map();            
+            // Add attendance records to the map
             attendanceRecords
                 .filter(record => record.employee === employee)
+                .forEach(record => {
+                    dateMap.set(record.date, {
+                        date: record.date,
+                        day: record.day,
+                        checkIn: record.checkIn,
+                        checkOut: record.checkOut,
+                        lateCheckIns: []
+                    });
+                });            
+            // Add late check-ins to the map
+            lateCheckIns
+                .filter(late => late.employee === employee)
+                .forEach(late => {
+                    if (!dateMap.has(late.date)) {
+                        dateMap.set(late.date, {
+                            date: late.date,
+                            day: late.day,
+                            checkIn: '-',
+                            checkOut: '-',
+                            lateCheckIns: []
+                        });
+                    }
+                    dateMap.get(late.date).lateCheckIns.push(late.time);
+                });
+            attendanceTable.innerHTML = '';
+            // Convert map to array and sort by date (newest first)
+            Array.from(dateMap.values())
                 .sort((a, b) => new Date(b.date) - new Date(a.date))
                 .forEach(record => {
-                    const checkOutTimes = Array.isArray(record.checkOut) ? record.checkOut : (record.checkOut ? [record.checkOut] : []);
-                    const lateCheckInTimes = lateCheckIns.filter(late => late.employee === employee && late.date === record.date);
-                    //Creating a row for checkin.
+                    // Create the main row
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${record.date}</td>
                         <td>${record.day}</td>
-                        <td>${record.checkIn || '-'}</td>
-                        <td>${record.checkOut ? record.checkOut[0] : '-'}</td>
-                        <td>${lateCheckInTimes.length > 0 ? lateCheckInTimes[0].time : '-'}</td>
+                        <td>${record.checkIn}</td>
+                        <td>${Array.isArray(record.checkOut) ? record.checkOut[0] : (record.checkOut || '-')}</td>
+                        <td>${record.lateCheckIns[0] || '-'}</td>
                     `;
                     attendanceTable.appendChild(row);
-                    //Condition and a Loop for creating an additional row for each check out.
-                    if (checkOutTimes.length > 1) {
-                        for (let i = 1; i < checkOutTimes.length; i++) {
+                    // Add additional rows for multiple check-outs
+                    if (Array.isArray(record.checkOut) && record.checkOut.length > 1) {
+                        for (let i = 1; i < record.checkOut.length; i++) {
                             const checkOutRow = document.createElement('tr');
                             checkOutRow.innerHTML = `
                                 <td>${record.date}</td>
                                 <td>${record.day}</td>
                                 <td>-</td>
-                                <td>${checkOutTimes[i]}</td>
+                                <td>${record.checkOut[i]}</td>
                                 <td>-</td>
                             `;
                             attendanceTable.appendChild(checkOutRow);
                         }
                     }
-                    //Condition and a Loop for creating an additional row for each late check in.
-                    if (lateCheckInTimes.length > 1) {
-                        for (let i = 1; i < lateCheckInTimes.length; i++) {
+                    // Add additional rows for multiple late check-ins
+                    if (record.lateCheckIns.length > 1) {
+                        for (let i = 1; i < record.lateCheckIns.length; i++) {
                             const lateRow = document.createElement('tr');
                             lateRow.innerHTML = `
                                 <td>${record.date}</td>
                                 <td>${record.day}</td>
                                 <td>-</td>
                                 <td>-</td>
-                                <td>${lateCheckInTimes[i].time}</td>
+                                <td>${record.lateCheckIns[i]}</td>
                             `;
                             attendanceTable.appendChild(lateRow);
                         }
                     }
                 });
-            updateSummaryValues();
         }
             //Record and Update the MISSED CHECKIN section.
             function recordMissedCheckIn() {
@@ -1041,7 +1192,6 @@
                     loadMissedCheckIns(selectedUser);
                 }
             }
-                // Automatically send notification to the employee for missed checkin.
                 sendNotification(employee);
             }
                 //Function to send notification to the employee for missed checkins and update the notification count.
@@ -1094,15 +1244,22 @@
                 }
 
                 function loadAdminData(selectedUser = '') {
-                // First load the attendance records
                 const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
                 const tableBody = document.getElementById('adminAttendanceTable');
-                if (!tableBody) return; //come out of the function if not in attendance view.
+                if (!tableBody) return;
                 tableBody.innerHTML = '';
+
+                const filteredRecords = attendanceRecords.filter(record => !selectedUser || record.employee === selectedUser);
+                
+                if (selectedUser && filteredRecords.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = '<td colspan="6" style="text-align: center;">No attendance records found for this employee</td>';
+                    tableBody.appendChild(row);
+                    return;
+                }
+
                 // Filtering/Retrieving the data from local storage and displaying attendance records.
-                attendanceRecords
-                .filter(record => !selectedUser || record.employee === selectedUser)
-                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                filteredRecords.sort((a, b) => new Date(b.date) - new Date(a.date))
                 .forEach(record => {
                     const checkOutTimes = Array.isArray(record.checkOut) ? record.checkOut : 
                     (record.checkOut ? [record.checkOut] : []);
@@ -1110,45 +1267,27 @@
                     const lateCheckInTimes = lateCheckIns.filter(late => late.employee === record.employee && late.date === record.date);
                     //Creating a row for Late checkin.
                     const row = document.createElement('tr');
+                    const checkOutDropdown = checkOutTimes.length > 1 ? 
+                        `<select>
+                            ${checkOutTimes.map(time => `<option>${time}</option>`).join('')}
+                         </select>` : 
+                        (checkOutTimes[0] || '-');
+                    
+                    const lateCheckInDropdown = lateCheckInTimes.length > 1 ?
+                        `<select>
+                            ${lateCheckInTimes.map(late => `<option>${late.time}</option>`).join('')}
+                         </select>` :
+                        (lateCheckInTimes[0]?.time || '-');
+
                     row.innerHTML = `
                         <td>${record.employee}</td>
                         <td>${record.date}</td>
                         <td>${record.day}</td>
                         <td>${record.checkIn || '-'}</td>
-                        <td>${record.checkOut ? record.checkOut[0] : '-'}</td>
-                        <td>${lateCheckInTimes.length > 0 ? lateCheckInTimes[0].time : '-'}</td>
+                        <td>${checkOutDropdown}</td>
+                        <td>${lateCheckInDropdown}</td>
                     `;
                     tableBody.appendChild(row);
-                    //Condition: Create additional rows for each check-out time after the first one
-                    if (checkOutTimes.length > 1) {
-                        for (let i = 1; i < checkOutTimes.length; i++) {
-                            const checkOutRow = document.createElement('tr');
-                            checkOutRow.innerHTML = `
-                                <td>${record.employee}</td>
-                                <td>${record.date}</td>
-                                <td>${record.day}</td>
-                                <td>-</td>
-                                <td>${checkOutTimes[i]}</td>
-                                <td>-</td>
-                            `;
-                            tableBody.appendChild(checkOutRow);
-                        }
-                    }
-                        //Condition: Create additional rows for each late checkin.
-                        if (lateCheckInTimes.length > 1) {
-                            for (let i = 1; i < lateCheckInTimes.length; i++) {
-                                const lateRow = document.createElement('tr');
-                                lateRow.innerHTML = `
-                                <td>${record.employee}</td>
-                                <td>${record.date}</td>
-                                <td>${record.day}</td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>${lateCheckInTimes[i].time}</td>
-                            `;
-                            tableBody.appendChild(lateRow);
-                        }
-                    }
                 });
                     loadMissedCheckIns(selectedUser);
                     updateMissedCheckInsSummary();
@@ -1199,7 +1338,11 @@
                     //Function for opening the Employee Holiday Request Section in a new window.
                     function openHolidayRequest() {
                     const employeeName = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-                    window.open(`holiday_request.html?employee=${encodeURIComponent(employeeName)}`, '_blank', 'width=800,height=800');
+                    const modal = document.getElementById('holidayModal');
+                    const frame = document.getElementById('holidayFrame');
+                    frame.src = `holiday_request.html?employee=${encodeURIComponent(employeeName)}`;
+                    modal.style.display = 'block';
+                    document.getElementById('modalOverlay').style.display = 'block';
                 }
                     //Function for Submitting the Progress Report in the Employee Page.
                     function submitProgress() {
@@ -1215,7 +1358,7 @@
                     const file = fileInput.files[0];
                     let fileData = null;
                     let fileName = '';
-                    //Condition: Read the file as base64
+                    //Condition: Read the file
                     if (file) {
                     const reader = new FileReader();
                     reader.onload = function(e) {
@@ -1247,18 +1390,15 @@
                     progressReports.push(progressReport);
                     //Save the progree report to localStorage.
                      localStorage.setItem('progressReports', JSON.stringify(progressReports));
-
-                    // Clear form
+                    //Clear form
                     document.getElementById('progressMessage').value = '';
                     document.getElementById('progressFile').value = '';
                     document.getElementById('fileName').textContent = '';
-
                     //Alert for successful submission for the progress report
                     alert('Progress report submitted successfully!');
                     loadEmployeeProgress();
                 }
-
-                    function loadEmployeeProgress() {
+                     function loadEmployeeProgress() {
                     const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
                     const progressReports = JSON.parse(localStorage.getItem('progressReports')) || [];
                     const tableBody = document.getElementById('employeeProgressTable');
@@ -1286,10 +1426,18 @@
                     const tableBody = document.getElementById('adminProgressTable');
                     if (!tableBody) return;
                     tableBody.innerHTML = '';
+
+                    const filteredReports = progressReports.filter(report => !selectedUser || report.employee === selectedUser);
+
+                    if (selectedUser && filteredReports.length === 0) {
+                        const row = document.createElement('tr');
+                        row.innerHTML = '<td colspan="7" style="text-align: center;">No progress reports found for this employee</td>';
+                        tableBody.appendChild(row);
+                        return;
+                    }
+
                     //Filter and sort progress reports Admin Page.
-                    progressReports
-                    .filter(report => !selectedUser || report.employee === selectedUser)
-                    .sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time))
+                    filteredReports.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time))
                     .forEach(report => {
                     const fileDownloadButton = report.fileData ? 
                         `<button onclick="downloadFile('${report.fileName}', '${report.fileData}')" class="download-btn">Download</button>` : 
@@ -1440,7 +1588,7 @@ function saveHolidayRequest() {
     const startDate = document.getElementById('startDate').value;
     const endDate = document.getElementById('endDate').value;
     const reason = document.getElementById('reason').value;
-    
+
     if (!startDate || !endDate || !reason) {
         alert('Please fill all fields');
         return;
@@ -1449,14 +1597,15 @@ function saveHolidayRequest() {
     const requestId = new Date().getTime(); 
     holidayRequests.push({
         id: requestId,
-        employeeName: employee,
-        startDate: startDate,
-        endDate: endDate,
-        days: calculateDaysBetweenDates(startDate, endDate),
-        reason: reason,
-        status: 'pending'
+        employee,
+        startDate,
+        endDate,
+        reason,
+        status: 'pending',
+        requestDate: new Date().toISOString()
     });
     localStorage.setItem('holidayRequests', JSON.stringify(holidayRequests));
+            
     alert('Holiday request submitted successfully!');
 }
 function openTimeTableModal() {
@@ -1593,6 +1742,7 @@ function showAdminSection(sectionName) {
     }
     }
         function logout() {
+            localStorage.removeItem('loggedInUser');
             showPage('loginPage');
             document.getElementById('userName').value = '';
             document.getElementById('userPassword').value = '';
@@ -1710,6 +1860,44 @@ function showAdminSection(sectionName) {
             }           
             return `${hours}h ${minutes}m`;
         }
+        function handleFileSelect(input) {
+            const fileUploadedIcon = document.getElementById('fileUploadedIcon');
+            const fileNameSpan = document.getElementById('fileName');
+            
+            if (input.files && input.files[0]) {
+                fileUploadedIcon.style.display = 'inline';
+                fileNameSpan.textContent = input.files[0].name;
+            } else {
+                fileUploadedIcon.style.display = 'none';
+                fileNameSpan.textContent = '';
+            }
+        }
+        function closeHolidayModal() {
+            document.getElementById('holidayModal').style.display = 'none';
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.getElementById('holidayFrame').src = '';
+        }
+        document.getElementById('holidayRequestForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const reason = document.getElementById('reason').value;
+
+            const requests = JSON.parse(localStorage.getItem('holidayRequests')) || [];
+            requests.push({
+                employee,
+                startDate,
+                endDate,
+                reason,
+                status: 'pending',
+                requestDate: new Date().toISOString()
+            });
+            localStorage.setItem('holidayRequests', JSON.stringify(requests));
+            
+            alert('Holiday request submitted successfully!');
+            closeHolidayModal();
+        });
     </script>
 </body>
 </html>

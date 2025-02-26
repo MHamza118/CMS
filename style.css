@@ -301,7 +301,6 @@ tr:nth-child(even) {
         margin: 20px;
         padding: 25px;
     }
-    
     .left-sidebar {
         flex-direction: row;
         padding: 15px;
@@ -540,6 +539,25 @@ table tbody tr {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Admin Attendance Table Dropdown Styles */
+#adminAttendanceTable select {
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+}
+
+#adminAttendanceTable select:hover {
+    border-color: #2596be;
+}
+
+#adminAttendanceTable select:focus {
+    outline: none;
+    border-color: #2596be;
+    box-shadow: 0 0 0 2px rgba(37, 150, 190, 0.1);
 }
 
 /* Custom Scrollbar */
