@@ -1,18 +1,13 @@
-/* Global Reset and Basic Styles */
-* {
+*{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif; /* Default font */
+    font-family: Arial, sans-serif;
 }
-
-/* Body Styling */
 body {
-    background-color: #f5f5f5; /* Light background */
-    color: #333; /* Default text color */
+    background-color: #f5f5f5; 
+    color: #333;
 }
-
-/* Login Page Container */
 #loginPage {
     display: flex;
     justify-content: center;
@@ -26,27 +21,23 @@ body {
     background: #1a1a1a;
     z-index: 1000;
 }
-
-/* Background Text Animation */
 #loginPage::before {
-    content: 'FSPro'; /* Background text */
+    content: 'FSPro';
     position: absolute;
-    font-size: 25vw; /* Responsive font size */
+    font-size: 25vw;
     font-weight: bold;
-    opacity: 0.35; /* Semi-transparent */
+    opacity: 0.35;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    animation: rotateBg 20s linear infinite; /* Continuous rotation */
+    animation: rotateBg 20s linear infinite;
     background: linear-gradient(45deg, #00fffc, #2596be, #4cb8e0, #00fffc);
     background-size: 300% 300%;
     -webkit-background-clip: text;
     background-clip: text;
-    color: transparent; /* Gradient text effect */
-    text-shadow: 2px 2px 30px rgba(0, 255, 252, 0.2); /* Glow effect */
+    color: transparent;
+    text-shadow: 2px 2px 30px rgba(0, 255, 252, 0.2);
 }
-
-/* Grid Background Animation */
 #loginPage::after {
     content: '';
     position: absolute;
@@ -57,14 +48,12 @@ body {
     background-image: 
     linear-gradient(90deg, #00fffc 1px, transparent 1px),
     linear-gradient(0deg, #00fffc 1px, transparent 1px);
-    background-size: 30px 30px; /* Grid size */
+    background-size: 30px 30px; 
     background-position: center;
-    opacity: 0.05; /* Subtle grid effect */
+    opacity: 0.05;
     transform-origin: center;
-    animation: gridMove 15s linear infinite; /* Grid movement */
+    animation: gridMove 15s linear infinite;
 }
-
-/* Keyframes for Background Rotation */
 @keyframes rotateBg {
     0% {
         transform: translate(-50%, -50%) rotate(0deg);
@@ -78,8 +67,6 @@ body {
         background-position: 0% 50%;
     }
 }
-
-/* Keyframes for Grid Movement */
 @keyframes gridMove {
     0% {
         transform: rotate(0deg);
@@ -88,99 +75,80 @@ body {
         transform: rotate(360deg);
     }
 }
-
-/* Login Container Styling */
 .login-container {
-    background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
+    background-color: rgba(255, 255, 255, 0.1);
     padding: 30px;
-    border-radius: 16px; /* Rounded corners */
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    border-radius: 16px; 
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
     width: 90%;
-    max-width: 400px; /* Responsive width */
+    max-width: 400px;
     position: relative;
-    z-index: 1; /* Ensure it's above the background */
-    backdrop-filter: blur(10px); /* Blur effect */
+    z-index: 1;
+    backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.18); /* Border with transparency */
-    transition: all 0.3s ease; /* Smooth hover transition */
+    border: 1px solid rgba(255, 255, 255, 0.18); 
+    transition: all 0.3s ease;
 }
-
-/* Hover Effect for Login Container */
 .login-container:hover {
-    transform: translateY(-5px); /* Slight lift */
-    box-shadow: 0 8px 40px rgba(255, 255, 255, 0.2); /* Enhanced shadow */
+    transform: translateY(-5px); 
+    box-shadow: 0 8px 40px rgba(255, 255, 255, 0.2);
 }
-
-/* Input Field Styling */
 .login-container input {
     width: 100%;
     padding: 12px;
     margin-bottom: 15px;
-    border: 1px solid rgba(46, 45, 45, 0.2); /* Semi-transparent border */
-    border-radius: 8px;
+    border: 1px solid rgba(46, 45, 45, 0.2); 
     transition: all 0.3s ease;
-    background: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
-    color:black; /* Text color */
+    background: rgba(255, 255, 255, 0.1);
+    color:black;
 }
-
-/* Input Focus Effect */
 .login-container input:focus {
     outline: none;
-    border-color: #00fffc; /* Highlight border */
-    box-shadow: 0 0 0 3px rgba(0, 255, 252, 0.2); /* Glow effect */
-    background: rgba(255, 255, 255, 0.15); /* Slightly brighter background */
+    border-color: #00fffc;
+    box-shadow: 0 0 0 3px rgba(0, 255, 252, 0.2); 
+    background: rgba(255, 255, 255, 0.15); 
 }
-
-/* Placeholder Text Styling */
 .login-container input::placeholder {
-    color: rgb(3, 3, 3); /* Semi-transparent placeholder */
+    color: rgb(3, 3, 3);
 }
 .login-container button {
     width: 100%;
     padding: 12px;
-    background-color: #2596be; /* Primary button color */
+    background-color: #2596be;
     color: white;
-    border: 1px solid rgba(0, 255, 252, 0.3); /* Semi-transparent border */
+    border: 1px solid rgba(0, 255, 252, 0.3);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
-    backdrop-filter: blur(5px); /* Blur effect */
+    backdrop-filter: blur(5px); 
 }
-
-/* Button Hover Effect */
 .login-container button:hover {
-    background-color: rgba(0, 255, 252, 0.3); /* Lighter background */
-    transform: translateY(-2px); /* Slight lift */
-    box-shadow: 0 4px 12px rgba(0, 255, 252, 0.2); /* Enhanced shadow */
+    background-color: rgba(0, 255, 252, 0.3); 
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 255, 252, 0.2);
 }
-
-/* Heading Styling */
 .login-container h1 {
     text-align: center;
     color: black;
     margin-bottom: 20px;
-    font-weight: 300; /* Light font weight */
-    letter-spacing: 1px; /* Spaced letters */
+    font-weight: 300; 
+    letter-spacing: 1px;
 }
 .header {
     background: linear-gradient(135deg, #2596be 0%, #1c7593 100%);
     box-shadow: 0 4px 20px rgba(37, 150, 190, 0.15);
     padding: 18px 30px;
 }
-
-
 .logo {
     font-size: 28px;
     letter-spacing: 1px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-
 .left-sidebar {
     background: linear-gradient(145deg, #ffffff 0%, #f8fbfc 100%);
     box-shadow: 4px 0 15px rgba(37, 150, 190, 0.08);
     border-right: 1px solid rgba(37, 150, 190, 0.1);
 }
-
 .left-sidebar button {
     padding: 14px 20px;
     border-radius: 8px;
@@ -190,12 +158,10 @@ body {
     gap: 12px;
     font-weight: 500;
 }
-
 .left-sidebar button:hover {
     transform: translateX(8px);
     box-shadow: 2px 4px 12px rgba(37, 150, 190, 0.1);
 }
-
 .main-content {
     background: linear-gradient(145deg, #ffffff 0%, #f8fbfc 100%);
     border-radius: 12px;
@@ -203,75 +169,61 @@ body {
     margin: 20px;
     border: 1px solid rgba(37, 150, 190, 0.1);
 }
-
 .employee-header {
     background: linear-gradient(135deg, #f8fbfc 0%, #ffffff 100%);
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(37, 150, 190, 0.08);
 }
-
 table {
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(37, 150, 190, 0.08);
 }
-
 th {
     background: linear-gradient(135deg, #2596be 0%, #1c7593 100%);
     color: white !important;
     font-weight: 600 !important;
     padding: 16px !important;
 }
-
 tr:nth-child(even) {
     background-color: #f8fbfc;
 }
-
 .status-pending, .status-approved, .status-rejected {
     padding: 6px 12px;
     border-radius: 20px;
     font-size: 0.9em;
 }
-
 .status-pending { background: rgba(243, 156, 18, 0.1); }
 .status-approved { background: rgba(39, 174, 96, 0.1); }
 .status-rejected { background: rgba(231, 76, 60, 0.1); }
-
 .progress-form {
     background: linear-gradient(145deg, #ffffff 0%, #f8fbfc 100%);
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(37, 150, 190, 0.08);
 }
-
 .file-upload-label {
     border: 2px dashed #2596be;
     background: rgba(37, 150, 190, 0.05) !important;
     transition: all 0.3s ease;
 }
-
 .file-upload-label:hover {
     background: rgba(37, 150, 190, 0.1) !important;
     transform: translateY(-2px);
 }
-
 .submit-progress {
     box-shadow: 0 4px 15px rgba(37, 150, 190, 0.2);
     transition: all 0.3s ease;
 }
-
 .submit-progress:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(37, 150, 190, 0.3);
 }
-
-/* Add these new styles */
 .glassmorphic-effect {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
-
 .section-title {
     font-size: 1.8rem;
     color: #2c3e50;
@@ -279,7 +231,6 @@ tr:nth-child(even) {
     position: relative;
     padding-left: 1.5rem;
 }
-
 .section-title::before {
     content: '';
     position: absolute;
@@ -291,14 +242,11 @@ tr:nth-child(even) {
     background: #2596be;
     border-radius: 4px;
 }
-
 .icon {
     width: 24px;
     height: 24px;
     filter: invert(38%) sepia(52%) saturate(457%) hue-rotate(156deg) brightness(90%) contrast(88%);
 }
-
-/* Update mobile styles */
 @media (max-width: 768px) {
     .login-container {
         margin: 20px;
@@ -309,7 +257,6 @@ tr:nth-child(even) {
         padding: 15px;
         gap: 8px;
     }
-
     .left-sidebar button {
         flex: 1;
         text-align: center;
@@ -317,9 +264,6 @@ tr:nth-child(even) {
         padding: 12px;
     }
 }
-/* Advanced Styles with Neomorphism, Dark Mode, and Animations */
-
-/* Global Variables for Theme Switching */
 :root {
     --primary-color: #2596be;
     --secondary-color: #1c7593;
@@ -332,13 +276,10 @@ tr:nth-child(even) {
     --shadow-light: rgba(0, 0, 0, 0.1);
     --shadow-dark: rgba(255, 255, 255, 0.1);
 }
-
-/* Dark Mode */
 body.dark-mode {
     background-color: var(--background-dark);
     color: var(--text-dark);
 }
-
 body.dark-mode .login-container,
 body.dark-mode .main-content,
 body.dark-mode .left-sidebar,
@@ -349,16 +290,13 @@ body.dark-mode table {
     color: var(--text-dark);
     border-color: rgba(255, 255, 255, 0.1);
 }
-
 body.dark-mode th {
     background: linear-gradient(135deg, #1c7593 0%, #125a73 100%);
 }
-
 body.dark-mode .left-sidebar button:hover,
 body.dark-mode .left-sidebar button.active {
     background-color: rgba(37, 150, 190, 0.2);
 }
-
 /* Neumorphic Design for Containers */
 .login-container,
 .main-content,
@@ -372,8 +310,6 @@ table {
                 -8px -8px 16px rgba(255, 255, 255, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
-
-/* Hover Effects with Transformations */
 .login-container:hover,
 .main-content:hover,
 .left-sidebar:hover,
@@ -385,8 +321,6 @@ table:hover {
                 -12px -12px 24px rgba(255, 255, 255, 0.7);
     transition: all 0.3s ease;
 }
-
-/* Buttons with Advanced Hover Effects */
 button,
 .submit-progress,
 .action-buttons button,
@@ -403,7 +337,6 @@ button,
     box-shadow: 4px 4px 8px var(--shadow-light),
                 -4px -4px 8px rgba(255, 255, 255, 0.7);
 }
-
 button:hover,
 .submit-progress:hover,
 .action-buttons button:hover,
@@ -415,13 +348,10 @@ button:hover,
                 -6px -6px 12px rgba(255, 255, 255, 0.7);
     background: var(--secondary-color);
 }
-
-/* Input Fields with Floating Labels */
 .form-group {
     position: relative;
     margin-bottom: 25px;
 }
-
 .form-group input,
 .form-group textarea {
     width: 100%;
@@ -431,13 +361,11 @@ button:hover,
     background: transparent;
     transition: all 0.3s ease;
 }
-
 .form-group input:focus,
 .form-group textarea:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(37, 150, 190, 0.1);
 }
-
 .form-group label {
     position: absolute;
     top: 12px;
@@ -448,7 +376,6 @@ button:hover,
     transition: all 0.3s ease;
     pointer-events: none;
 }
-
 .form-group input:focus ~ label,
 .form-group input:not(:placeholder-shown) ~ label,
 .form-group textarea:focus ~ label,
@@ -459,8 +386,6 @@ button:hover,
     color: var(--primary-color);
     background: var(--card-bg-light);
 }
-
-/* Animated Progress Bars */
 .progress-bar {
     width: 100%;
     height: 10px;
@@ -469,38 +394,31 @@ button:hover,
     overflow: hidden;
     position: relative;
 }
-
 .progress-bar-fill {
     height: 100%;
     background: var(--primary-color);
     border-radius: 5px;
     animation: progressAnimation 1.5s ease-in-out;
 }
-
 @keyframes progressAnimation {
     0% { width: 0%; }
     100% { width: var(--progress-width, 100%); }
 }
-
-/* Dark Mode Toggle Switch */
 .theme-switch {
     position: fixed;
     bottom: 20px;
     right: 20px;
     z-index: 1000;
 }
-
 .theme-switch label {
     display: flex;
     align-items: center;
     gap: 8px;
     cursor: pointer;
 }
-
 .theme-switch input[type="checkbox"] {
     display: none;
 }
-
 .theme-switch .slider {
     width: 50px;
     height: 25px;
@@ -509,7 +427,6 @@ button:hover,
     position: relative;
     transition: all 0.3s ease;
 }
-
 .theme-switch .slider::before {
     content: '';
     position: absolute;
@@ -521,30 +438,23 @@ button:hover,
     left: 2px;
     transition: all 0.3s ease;
 }
-
 .theme-switch input:checked + .slider {
     background: var(--primary-color);
 }
-
 .theme-switch input:checked + .slider::before {
     transform: translateX(25px);
 }
-
-/* Animated Table Rows */
 table tbody tr {
     opacity: 0;
     transform: translateY(20px);
     animation: fadeInUp 0.5s ease forwards;
 }
-
 @keyframes fadeInUp {
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
-
-/* Admin Attendance Table Dropdown Styles */
 #adminAttendanceTable select {
     padding: 4px 8px;
     border: 1px solid #ddd;
@@ -552,61 +462,47 @@ table tbody tr {
     background-color: white;
     cursor: pointer;
 }
-
 #adminAttendanceTable select:hover {
     border-color: #2596be;
 }
-
 #adminAttendanceTable select:focus {
     outline: none;
     border-color: #2596be;
     box-shadow: 0 0 0 2px rgba(37, 150, 190, 0.1);
 }
-
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
 }
-
 ::-webkit-scrollbar-track {
     background: rgba(37, 150, 190, 0.1);
     border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb {
     background: var(--primary-color);
     border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
     background: var(--secondary-color);
 }
-
-/* Responsive Design Enhancements */
 @media (max-width: 768px) {
     .login-container {
         margin: 10px;
         padding: 20px;
     }
-
     .left-sidebar {
         flex-direction: row;
         padding: 10px;
         gap: 5px;
     }
-
     .left-sidebar button {
         padding: 10px;
         font-size: 14px;
     }
-
     .theme-switch {
         bottom: 10px;
         right: 10px;
     }
 }
-
-/* Add hover effects to buttons */
 button, .submit-progress, .action-buttons button, .notification-btn, .approve-btn, .reject-btn {
     background: linear-gradient(135deg, #2596be, #1c7593);
     color: white;
@@ -618,13 +514,11 @@ button, .submit-progress, .action-buttons button, .notification-btn, .approve-bt
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     animation: pulse 2s infinite;
 }
-
 button:hover, .submit-progress:hover, .action-buttons button:hover, .notification-btn:hover, .approve-btn:hover, .reject-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
-    animation: none; /* Disable pulse animation on hover */
+    animation: none; 
 }
-
 @keyframes pulse {
     0% {
         transform: scale(1);
@@ -636,28 +530,22 @@ button:hover, .submit-progress:hover, .action-buttons button:hover, .notificatio
         transform: scale(1);
     }
 }
-
-/* Add a subtle animation to table rows */
 table tbody tr {
     opacity: 0;
     transform: translateY(20px);
     animation: fadeInUp 0.5s ease forwards;
 }
-
 @keyframes fadeInUp {
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
-
-/* Add a glowing effect to input fields on focus */
 .login-container input:focus {
     border-color: #2596be;
     box-shadow: 0 0 0 3px #2596be;
     animation: glow 1.5s infinite alternate;
 }
-
 @keyframes glow {
     from {
         box-shadow: 0 0 0 3px rgba(37, 150, 190, 0.3);
@@ -666,7 +554,6 @@ table tbody tr {
         box-shadow: 0 0 0 6px rgba(37, 150, 190, 0.6);
     }
 }
-/* Add a loading animation */
 .loading-screen {
     position: fixed;
     top: 0;
@@ -680,14 +567,12 @@ table tbody tr {
     z-index: 1000;
     animation: fadeOut 1s ease-in-out forwards;
 }
-
 @keyframes fadeOut {
     to {
         opacity: 0;
         visibility: hidden;
     }
 }
-
 .loading-spinner {
     border: 4px solid rgba(255, 255, 255, 0.3);
     border-top: 4px solid #2596be;
@@ -696,7 +581,6 @@ table tbody tr {
     height: 40px;
     animation: spin 1s linear infinite;
 }
-
 @keyframes spin {
     0% {
         transform: rotate(0deg);
@@ -714,7 +598,6 @@ html {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     animation: float 3s ease-in-out infinite;
 }
-
 @keyframes float {
     0%, 100% {
         transform: translateY(0);
@@ -729,7 +612,6 @@ html {
     box-shadow: 0 0 10px rgba(37, 150, 190, 0.7);
     animation: glowBorder 1.5s infinite alternate;
 }
-
 @keyframes glowBorder {
     from {
         box-shadow: 0 0 10px rgba(37, 150, 190, 0.7);
@@ -743,7 +625,6 @@ html {
     transform: translateY(20px);
     animation: fadeInSection 0.5s ease forwards;
 }
-
 @keyframes fadeInSection {
     to {
         opacity: 1;
@@ -767,7 +648,6 @@ body::before {
     animation: moveBackground 20s linear infinite;
     transform: translateZ(-1px) scale(2);
 }
-
 @keyframes moveBackground {
     0% {
         transform: translateX(0) translateY(0);
@@ -779,10 +659,6 @@ body::before {
         transform: translateX(0) translateY(0);
     }
 }
-
-
-
-/* Header Styles */
 .header {
     background-color: #2596be;
     color: white;
@@ -791,44 +667,35 @@ body::before {
     justify-content: space-between;
     align-items: center;
 }
-
 .logo {
     font-size: 24px;
     font-weight: bold;
 }
-
 .select-employee {
     display: flex;
     align-items: center;
     gap: 20px;
 }
-
 .select-employee span {
     color: #333;
     font-size: 1.1em;
 }
-
 #currentDate {
     font-weight: 500;
 }
-
 #currentTime {
     font-weight: bold;
     color: #2c3e50;
 }
-
 #employeeSelect {
     padding: 5px;
     border-radius: 4px;
     border: 1px solid #ddd;
 }
-
-/* Layout Styles */
 .container {
     display: flex;
     min-height: calc(100vh - 60px);
 }
-
 .left-sidebar {
     width: 200px;
     padding: 20px;
@@ -838,13 +705,11 @@ body::before {
     gap: 10px;
     min-height: calc(100vh - 60px);
 }
-
 .main-buttons {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
-
 .left-sidebar button {
     width: 100%;
     padding: 10px;
@@ -855,13 +720,11 @@ body::before {
     border-radius: 4px;
     transition: background-color 0.2s;
 }
-
 .left-sidebar button:hover,
 .left-sidebar button.active {
     background-color: #3498db;
     color: white;
 }
-
 .main-content {
     flex: 1;
     padding: 20px;
@@ -869,21 +732,16 @@ body::before {
     margin: 20px;
     border-radius: 4px;
 }
-
 .main-content h2 {
     margin-bottom: 10px;
 }
-
 .main-content h2:not(:first-child) {
     margin-top: 40px;
 }
-
 .main-content p {
     color: #666;
     margin-bottom: 20px;
 }
-
-/* Employee Header Styles */
 .employee-header {
     display: flex;
     justify-content: space-between;
@@ -895,19 +753,15 @@ body::before {
     background-color: #f9f9f9;
     transition: all 0.3s ease;
 }
-
 .employee-header #employeeDetails {
     font-size: 1.2em;
     margin: 0;
 }
-
-/* Button Styles */
 .action-buttons {
     margin: 0;
     display: flex;
     gap: 10px;
 }
-
 .action-buttons button {
     padding: 8px 20px;
     background-color: #2596be;
@@ -917,34 +771,25 @@ body::before {
     cursor: pointer;
     margin-right: 10px;
 }
-
 .action-buttons button:hover {
     background-color: #1c7593;
 }
-
-/* Table Styles */
 table {
     width: 100%;
     border-collapse: collapse;
 }
-
 th, td {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #ddd;
 }
-
 th {
     background-color: #f8f9fa;
     font-weight: normal;
 }
-
-/* Missed Check-Ins Table Styles */
 #MissedCheckInsTable {
     margin-top: 30px;
 }
-
-/* Progress and Holiday Sections */
 textarea {
     width: 100%;
     padding: 10px;
@@ -953,22 +798,18 @@ textarea {
     resize: vertical;
     margin-bottom: 15px;
 }
-
 .progress-entry {
     padding: 15px;
     border-bottom: 1px solid #ddd;
 }
-
 .progress-entry:last-child {
     border-bottom: none;
 }
-
 /* Progress Form Styles */
 .progress-form {
     max-width: 800px;
     margin: 20px 0;
 }
-
 .progress-form textarea {
     width: 100%;
     padding: 12px;
@@ -978,14 +819,12 @@ textarea {
     font-family: inherit;
     margin-bottom: 15px;
 }
-
 .file-upload {
     margin: 15px 0;
     display: flex;
     align-items: center;
     gap: 10px;
 }
-
 .file-label {
     display: inline-flex;
     align-items: center;
@@ -997,7 +836,6 @@ textarea {
     cursor: pointer;
     transition: background-color 0.2s;
 }
-
 .file-label:hover {
     background-color: #e9e9e9;
 }
@@ -1005,12 +843,10 @@ textarea {
 .file-icon {
     font-size: 1.2em;
 }
-
 .file-name {
     color: #666;
     font-size: 0.9em;
 }
-
 .submit-progress {
     background-color: #27ae60;
     color: white;
@@ -1021,34 +857,28 @@ textarea {
     font-size: 1em;
     transition: background-color 0.2s;
 }
-
 .submit-progress:hover {
     background-color: #219a52;
 }
-
 /* Section Styles */
 #attendance-section,
 #progress-section {
     margin-top: 20px;
 }
-
 #progress-section h2 {
     color: #2c3e50;
     margin-bottom: 15px;
 }
-
 #progress-section p {
     color: #666;
     font-size: 1.1em;
 }
-
 /* Admin Controls */
 .admin-controls {
     display: flex;
     align-items: center;
     gap: 15px;
 }
-
 .admin-controls button {
     padding: 8px 20px;
     background-color: white;
@@ -1057,11 +887,9 @@ textarea {
     border-radius: 4px;
     cursor: pointer;
 }
-
 .admin-controls button:hover {
     background-color: #f0f0f0;
 }
-
 #adminUserSelect {
     padding: 8px 12px;
     border: 1px solid #ddd;
@@ -1071,12 +899,10 @@ textarea {
     cursor: pointer;
     min-width: 150px;
 }
-
 #adminUserSelect:focus {
     outline: none;
     border-color: #3498db;
 }
-
 /* Notification Button Styles */
 .notification-btn {
     padding: 6px 12px;
@@ -1087,17 +913,14 @@ textarea {
     color: white;
     transition: background-color 0.2s;
 }
-
 .notification-btn:hover:not([disabled]) {
     background-color: #c0392b;
 }
-
 .notification-btn[disabled] {
     background-color: #95a5a6;
     cursor: not-allowed;
     opacity: 0.7;
 }
-
 /* Progress Reports Styles */
 .download-link {
     color: #3498db;
@@ -1106,72 +929,58 @@ textarea {
     align-items: center;
     gap: 5px;
 }
-
 .download-link:hover {
     text-decoration: underline;
 }
-
 td select {
     padding: 5px;
     border-radius: 4px;
     border: 1px solid #ddd;
     width: 100%;
 }
-
 td select option[value="Pending Review"] {
     color: #f39c12;
 }
-
 td select option[value="Approved"] {
     color: #27ae60;
 }
-
 td select option[value="Needs Revision"] {
     color: #e74c3c;
 }
-
 #adminProgressTable td {
     max-width: 300px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
 #adminProgressTable td:nth-child(4) {
     white-space: pre-wrap;
     max-width: 400px;
 }
-
 /* Progress Section Styles */
 #progressList {
     margin-top: 30px;
 }
-
 #progressList h3 {
     margin-bottom: 15px;
     color: #2c3e50;
 }
-
 .progress-form {
     background-color: #f8f9fa;
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 20px;
 }
-
 /* Fix scrolling in modals */
 #progress-section {
     overflow: visible !important;
 }
-
 .modal-content {
     overflow-y: auto !important;
 }
-
 body .main-content > div {
     overflow: visible !important;
 }
-
 #progressMessage {
     width: 100%;
     padding: 10px;
@@ -1180,14 +989,12 @@ body .main-content > div {
     resize: vertical;
     min-height: 100px;
 }
-
 .file-upload-container {
     margin: 20px 0;
     display: flex;
     align-items: center;
     gap: 10px;
 }
-
 .file-upload-label {
     display: inline-flex;
     align-items: center;
@@ -1199,28 +1006,23 @@ body .main-content > div {
     cursor: pointer;
     transition: all 0.3s ease;
 }
-
 .file-upload-label:hover {
     background-color: #e9ecef;
     border-color: #ced4da;
 }
-
 .file-icon {
     font-size: 20px;
 }
-
 #fileName {
     color: #666;
     margin-left: 10px;
 }
-
 .submit-container {
     margin-top: 30px;
     margin-bottom: 30px;
     display: flex;
     justify-content: flex-end;
 }
-
 .submit-progress {
     background-color: #3498db;
     color: white;
@@ -1231,11 +1033,9 @@ body .main-content > div {
     transition: background-color 0.3s;
     font-size: 16px;
 }
-
 .submit-progress:hover {
     background-color: #2980b9;
 }
-
 /* Table Styles */
 table {
     width: 100%;
@@ -1244,23 +1044,19 @@ table {
     background-color: white;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-
 th, td {
     padding: 12px 15px;
     text-align: left;
     border-bottom: 1px solid #ddd;
 }
-
 th {
     background-color: #f5f6fa;
     color: #2c3e50;
     font-weight: 600;
 }
-
 td {
     color: #34495e;
 }
-
 .download-link {
     color: #3498db;
     text-decoration: none;
@@ -1268,11 +1064,9 @@ td {
     align-items: center;
     gap: 5px;
 }
-
 .download-link:hover {
     text-decoration: underline;
 }
-
 /* Status Styles */
 td select {
     padding: 6px 10px;
@@ -1281,19 +1075,15 @@ td select {
     width: 100%;
     background-color: white;
 }
-
 td select option[value="Pending Review"] {
     color: #f39c12;
 }
-
 td select option[value="Approved"] {
     color: #27ae60;
 }
-
 td select option[value="Needs Revision"] {
     color: #e74c3c;
 }
-
 /* Message Cell Styles */
 #adminProgressTable td:nth-child(4),
 #employeeProgressTable td:nth-child(3) {
@@ -1301,18 +1091,15 @@ td select option[value="Needs Revision"] {
     white-space: pre-wrap;
     word-break: break-word;
 }
-
 /* File Cell Styles */
 #adminProgressTable td:nth-child(5),
 #employeeProgressTable td:nth-child(4) {
     white-space: nowrap;
 }
-
 /* Update form group spacing */
 .form-group {
     margin-bottom: 25px;
 }
-
 .form-group textarea {
     width: 100%;
     padding: 12px;
@@ -1330,7 +1117,6 @@ td select option[value="Needs Revision"] {
         padding: 0;
         width: 100%;
     }
-
     .main-content {
         margin: 0;
         padding: 10px;
@@ -1339,7 +1125,6 @@ td select option[value="Needs Revision"] {
         border-radius: 0;
         background: white; /* Remove glassmorphism effect */
     }
-
     /* Hamburger menu styles */
     .hamburger-menu {
         display: block;
@@ -1351,7 +1136,6 @@ td select option[value="Needs Revision"] {
         height: 22px;
         cursor: pointer;
     }
-
     .hamburger-menu span {
         display: block;
         position: absolute;
@@ -1364,35 +1148,28 @@ td select option[value="Needs Revision"] {
         transform: rotate(0deg);
         transition: .25s ease-in-out;
     }
-
     .hamburger-menu span:nth-child(1) {
         top: 0px;
     }
-
     .hamburger-menu span:nth-child(2) {
         top: 9px;
     }
-
     .hamburger-menu span:nth-child(3) {
         top: 18px;
     }
-
     /* For active hamburger */
     .hamburger-menu.active span:nth-child(1) {
         top: 9px;
         transform: rotate(135deg);
     }
-
     .hamburger-menu.active span:nth-child(2) {
         opacity: 0;
         left: -60px;
     }
-
     .hamburger-menu.active span:nth-child(3) {
         top: 9px;
         transform: rotate(-135deg);
     }
-
     /* Sidebar for mobile */
     .left-sidebar {
         position: fixed;
@@ -1408,11 +1185,9 @@ td select option[value="Needs Revision"] {
         overflow-y: auto;
         box-shadow: 3px 0 15px rgba(0,0,0,0.2);
     }
-
     .left-sidebar.active {
         left: 0;
     }
-
     .left-sidebar button {
         padding: 12px;
         font-size: 16px;
@@ -1420,7 +1195,6 @@ td select option[value="Needs Revision"] {
         width: 100%;
         margin-bottom: 5px;
     }
-
     /* Sidebar overlay */
     .sidebar-overlay {
         display: none;
@@ -1432,25 +1206,21 @@ td select option[value="Needs Revision"] {
         background: rgba(0,0,0,0.5);
         z-index: 140;
     }
-
     .header {
         flex-direction: row;
         justify-content: center;
         align-items: center;
         padding: 15px 50px;
     }
-
     /* Hide date and time on mobile */
     #currentDate, #currentTime {
         display: none;
     }
-
     .select-employee {
         flex-direction: row;
         justify-content: flex-end;
         gap: 5px;
     }
-
     /* Admin controls mobile styles */
     .admin-controls {
         flex-direction: column;
@@ -1458,21 +1228,17 @@ td select option[value="Needs Revision"] {
         gap: 10px;
         margin-top: 10px;
     }
-
     #adminUserSelect {
         width: 100%;
     }
-
     .admin-controls button {
         width: 100%;
         padding: 10px;
         font-size: 14px;
     }
-
     #uninformedLeaveBtn {
         margin-bottom: 10px;
     }
-
     table {
         display: block;
         overflow-x: auto;
@@ -1480,20 +1246,17 @@ td select option[value="Needs Revision"] {
         font-size: 14px;
         margin-bottom: 15px;
     }
-
     .holiday-form, .request-history, .missed-checkins-section {
         margin: 10px 0;
         padding: 10px;
         width: 100%;
     }
-
     .login-container {
         margin: 20px;
         width: 90%;
         max-width: none;
         padding: 20px;
     }
-
     .employee-header {
         flex-direction: column;
         gap: 10px;
@@ -1501,74 +1264,60 @@ td select option[value="Needs Revision"] {
         padding: 10px;
         margin-bottom: 15px;
     }
-
     .action-buttons {
         width: 100%;
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: space-between;
     }
-
     .action-buttons button {
         width: 48%;
         margin: 5px 0;
         padding: 10px 5px;
         font-size: 14px;
     }
-
     /* Make all form inputs and textareas mobile-friendly */
     input, textarea, select {
-        font-size: 16px !important; /* Prevent zoom on focus in iOS */
+        font-size: 16px !important;
         max-width: 100%;
     }
-
     .summary-section {
         padding: 10px;
     }
-
     .summary-row {
         flex-wrap: wrap;
     }
-
     .summary-item {
         flex: 1 1 50%;
         padding: 5px;
     }
-
     .summary-item h4 {
         font-size: 12px;
     }
-
     .summary-item p {
         font-size: 18px;
     }
-
     /* Modal content adjustments for mobile */
     .modal-content {
         width: 95%;
         max-width: none;
     }
-
     .holiday-modal {
         width: 95%;
         max-width: none;
     }
-
     th, td {
         padding: 8px;
         font-size: 14px;
     }
-
     .approve-btn, .reject-btn {
         padding: 4px 8px;
         font-size: 12px;
     }
-
     .filter-section {
         flex-direction: column;
         align-items: flex-start;
     }
-
     /* Task management mobile styles */
     .task-form {
         display: flex;
@@ -1576,33 +1325,26 @@ td select option[value="Needs Revision"] {
         gap: 10px;
         padding: 10px;
     }
-
     .task-form input, .task-form select {
         width: 100%;
     }
-
     /* Admin content sections need more padding */
     #adminAttendance, #adminProgress, #adminHolidays, #adminTimeTable, #adminTargets {
         padding: 10px 5px;
     }
-
     /* Admin timetable section */
     .admin-timetable-section {
         padding: 0;
     }
-
     .timetable-container {
         overflow-x: auto;
     }
-
     .admin-timetable {
         min-width: 100%;
     }
-
     .section-header {
         padding: 10px;
     }
-
     .selected-employee {
         font-size: 14px;
     }
@@ -1613,52 +1355,41 @@ td select option[value="Needs Revision"] {
         margin: 15px;
         padding: 15px;
     }
-
     .left-sidebar {
         width: 180px;
         padding: 15px;
     }
-
     .main-content {
         margin: 10px;
         padding: 15px;
     }
-
     .header {
         padding: 15px;
     }
-
     .login-container {
         max-width: 350px;
     }
-
     th, td {
         padding: 10px;
         font-size: 15px;
     }
-
     .holiday-form {
         max-width: 100%;
     }
-
     .select-employee {
         flex-direction: row;
         flex-wrap: wrap;
     }
-
     .employee-header {
         padding: 10px;
     }
-
     .action-buttons button {
         padding: 6px 12px;
     }
-
     .filter-section select {
         min-width: 100%;
     }
 }
-
 /* Employee Page */
 #employeePage {
     position: fixed;
@@ -1670,7 +1401,6 @@ td select option[value="Needs Revision"] {
     background: #f5f5f5;
     overflow-y: auto;
 }
-
 /* Admin Page */
 #adminPage {
     position: fixed;
@@ -1682,19 +1412,16 @@ td select option[value="Needs Revision"] {
     background: #f5f5f5;
     overflow-y: auto;
 }
-
 /* Make main content scrollable */
 .main-content {
     max-height: calc(100vh - 160px);
     overflow-y: auto;
 }
-
 /* Make tables scrollable when they have many rows */
 #attendance-section, #progress-section, #holidayRequests, #employeeTasks-section {
     max-height: calc(100vh - 200px);
     overflow-y: auto;
 }
-
 /* Ensure table headers stay fixed */
 table thead {
     position: sticky;
