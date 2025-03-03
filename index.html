@@ -1210,49 +1210,66 @@
         //Update the clock/Time for every second.
         setInterval(updateTime, 1000);
         updateTime();
-        // Employee Page Functions.
         function handleCheckIn() {
-            const now = new Date();
-            const hours = now.getHours();
-            const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-            //check the condition for check in after 10AM, If yes then ADD LATE CHECK IN button will be displayed.
-            if (hours >= 10) {
-                alert('You cannot check in after 10:00 AM. Please contact your supervisor.');
-                document.getElementById('lateCheckInBtn').style.display = 'inline-block';
-                try {
-                    recordMissedCheckIn();
-                } catch(e) {
-                    console.log('Error recording missed check-in:', e);
-                }
-                return;
-            }
-            addAttendanceRecord('checkIn');
-            //Alert for successful check in.
-            alert('Check-in successful! Time recorded: ' + now.toLocaleTimeString());
-            clearNotifications();
-            loadAttendanceTable();
-        }
-        function handleLateCheckIn() {
-            const now = new Date();
-            const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-            const date = now.toLocaleDateString();
-            const day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
-            const time = now.toLocaleTimeString();
-            let lateCheckIns = JSON.parse(localStorage.getItem('lateCheckIns')) || [];    
-            // Always record the late check-in (removed check for already recorded)
-            lateCheckIns.push({
-                employee: employee,
-                date: date,
-                day: day,
-                time: time,
-            });
-            localStorage.setItem('lateCheckIns', JSON.stringify(lateCheckIns));            
-            // Make sure the late check-in appears in the attendance table
-            loadAttendanceTable();
-            updateSummaryValues();
-            sendNotification(employee);
-            alert('Late check-in recorded successfully!');
-        }
+    const now = new Date();
+    const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
+    const dateString = now.toLocaleDateString();
+    const timeString = now.toLocaleTimeString();
+    // Retrieve the employee's scheduled check-in time
+    const timeTables = JSON.parse(localStorage.getItem('timeTables')) || [];
+    const employeeTimeTable = timeTables.find(t => t.employee === employee);
+    if (!employeeTimeTable) {
+        alert('Time table not set. Please set your time table first.');
+        return;
+    }
+    // Get today's scheduled check-in time
+    const dayOfWeek = now.toLocaleString('en-us', { weekday: 'long' }).toLowerCase();
+    const scheduledCheckIn = employeeTimeTable[dayOfWeek]?.checkIn;
+    if (!scheduledCheckIn) {
+        alert('No scheduled check-in time for today.');
+        return;
+    }
+    const scheduledTime = new Date();
+    const [scheduledHours, scheduledMinutes] = scheduledCheckIn.split(':').map(Number);
+    scheduledTime.setHours(scheduledHours, scheduledMinutes, 0, 0);
+    // Calculate the time difference in minutes
+    const diffMinutes = (now - scheduledTime) / (1000 * 60);
+    if (diffMinutes > 60) {
+        // More than 1 hour late → Only allow "Late Check-In"
+        alert('You are more than 1 hour late! You must use the Late Check-In option.');
+        document.getElementById('lateCheckInBtn').style.display = 'inline-block';
+        return;
+    } else if (diffMinutes > 0) {
+        // Less than 1 hour late → Warn but allow check-in
+        alert('You are late! Consider using the Late Check-In option.');
+        document.getElementById('lateCheckInBtn').style.display = 'inline-block';
+    }
+    // Proceed with normal check-in
+    addAttendanceRecord('checkIn');
+    alert('Check-in successful at ' + timeString);
+    clearNotifications();
+    loadAttendanceTable();
+}
+function handleLateCheckIn() {
+    const now = new Date();
+    const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
+    const date = now.toLocaleDateString();
+    const day = now.toLocaleString('en-us', { weekday: 'long' });
+    const time = now.toLocaleTimeString();
+    let lateCheckIns = JSON.parse(localStorage.getItem('lateCheckIns')) || [];
+    // Record the late check-in
+    lateCheckIns.push({
+        employee: employee,
+        date: date,
+        day: day,
+        time: time,
+    });
+    localStorage.setItem('lateCheckIns', JSON.stringify(lateCheckIns));
+    alert('Late check-in recorded successfully!');
+    loadAttendanceTable();
+    updateSummaryValues();
+    sendNotification(employee);
+}
                 //Function to send notification to the employee for missed checkins and update the notification count.
                 function sendNotification(employee) {
                 const notificationCount = document.getElementById('notificationCount');
@@ -2444,12 +2461,10 @@ function downloadTaskFile(fileName, fileData) {
                     (Array.isArray(record.checkOut) ? record.checkOut : [record.checkOut]) : [];
                 
                 // Create the main row
-                const row = document.createElement('tr');
-                
+                const row = document.createElement('tr');              
                 // Get day of the week from either record or late check-in
                 const day = record ? record.day : 
-                           (lateCheckInsForDate.length > 0 ? lateCheckInsForDate[0].day : '');
-                
+                           (lateCheckInsForDate.length > 0 ? lateCheckInsForDate[0].day : '');               
                 row.innerHTML = `
                     <td>${date}</td>
                     <td>${day}</td>
@@ -2457,14 +2472,12 @@ function downloadTaskFile(fileName, fileData) {
                     <td>${checkOutTimes.length > 0 ? checkOutTimes[0] : '-'}</td>
                     <td>${lateCheckInsForDate.length > 0 ? lateCheckInsForDate[0].time : '-'}</td>
                 `;
-                tableBody.appendChild(row);
-                
+                tableBody.appendChild(row);               
                 // Calculate how many additional rows we need
                 const maxAdditionalEntries = Math.max(
                     checkOutTimes.length > 1 ? checkOutTimes.length - 1 : 0,
                     lateCheckInsForDate.length > 1 ? lateCheckInsForDate.length - 1 : 0
-                );
-                
+                );                
                 // Add additional rows if needed
                 for (let i = 0; i < maxAdditionalEntries; i++) {
                     const additionalRow = document.createElement('tr');
