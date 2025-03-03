@@ -1210,7 +1210,7 @@
         //Update the clock/Time for every second.
         setInterval(updateTime, 1000);
         updateTime();
-        function handleCheckIn() {
+    function handleCheckIn() {
     const now = new Date();
     const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
     const dateString = now.toLocaleDateString();
@@ -1232,19 +1232,18 @@
     const scheduledTime = new Date();
     const [scheduledHours, scheduledMinutes] = scheduledCheckIn.split(':').map(Number);
     scheduledTime.setHours(scheduledHours, scheduledMinutes, 0, 0);
-    // Calculate the time difference in minutes
+    //time difference in minutes
     const diffMinutes = (now - scheduledTime) / (1000 * 60);
     if (diffMinutes > 60) {
-        // More than 1 hour late → Only allow "Late Check-In"
-        alert('You are more than 1 hour late! You must use the Late Check-In option.');
+        //More than 1 hour late, Only allow "Late Check-In"
+        alert('You are more than 1 hour late! Use Late Check In.');
         document.getElementById('lateCheckInBtn').style.display = 'inline-block';
         return;
     } else if (diffMinutes > 0) {
-        // Less than 1 hour late → Warn but allow check-in
-        alert('You are late! Consider using the Late Check-In option.');
+        //Less than 1 hour late, Warn but allow check-in
+        alert('You are late but Less than 01 hour, check in.');
         document.getElementById('lateCheckInBtn').style.display = 'inline-block';
     }
-    // Proceed with normal check-in
     addAttendanceRecord('checkIn');
     alert('Check-in successful at ' + timeString);
     clearNotifications();
