@@ -7,6 +7,11 @@
     <title>FSPro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="firebase.js"></script>
     <style>
         .missed-checkins-section {
             margin-top: 30px;
@@ -1653,6 +1658,7 @@
                 });
                 function updateHolidayStatus(requestId, newStatus) {
                     let requests = JSON.parse(localStorage.getItem('holidayRequests')) || [];
+
                     let requestIndex = requests.findIndex(req => req.id == requestId);
                     if (requestIndex === -1) {
                         alert("Request not found!");
@@ -1694,7 +1700,7 @@
                     endDate,
                     reason,
                     status: 'pending',
-                    requestDate: new Date().toISOString()
+                    requestDate: new Date().toISOString() 
                 });
                 localStorage.setItem('holidayRequests', JSON.stringify(holidayRequests));
                 alert('Holiday request submitted successfully!');
