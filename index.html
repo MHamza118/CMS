@@ -7,10 +7,9 @@
     <title>FSPro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <script src="firebase.js"></script>
     <style>
         .missed-checkins-section {
@@ -987,8 +986,19 @@
                     return;
                 }
                 if (confirm(`Are you sure you want to delete the employee "${username}"? This cannot be undone.`)) {
+                    // Delete from local object
                     delete users[username];
                     localStorage.setItem('users', JSON.stringify(users));
+
+                    // Delete from Firebase
+                    database.ref(`users/${username}`).remove()
+                        .then(() => {
+                            console.log('Employee removed from Firebase successfully');
+                        })
+                        .catch(error => {
+                            console.error('Error removing employee from Firebase:', error);
+                        });
+
                     //Remove the employee from admin select dropdown
                     const adminUserSelect = document.getElementById('adminUserSelect');
                     const optionToRemove = Array.from(adminUserSelect.options).find(option => option.value === username);
@@ -1027,6 +1037,20 @@
                     phone: phone,
                     email: email
                 };
+
+                // Save to Firebase
+                saveToFirebase(`users/${username}`, {
+                    password: password,
+                    id: employeeId,
+                    role: 'employee',
+                    phone: phone,
+                    email: email
+                }).then(() => {
+                    console.log('Employee added to Firebase successfully');
+                }).catch(error => {
+                    console.error('Error adding employee to Firebase:', error);
+                });
+
                 //Update the select dropdown in the Admin Page.
                 const selectElement = document.getElementById('adminUserSelect');
                 const option = document.createElement('option');
@@ -1050,24 +1074,74 @@
                 }
                 alert('Employee added successfully!');
             }
-            // Load users from localStorage when page loads.
+            // Load users from Firebase and localStorage when page loads.
             window.addEventListener('load', () => {
-                const savedUsers = localStorage.getItem('users');
-                if (savedUsers) {
-                    const parsedUsers = JSON.parse(savedUsers);
-                    Object.keys(parsedUsers).forEach(username => {
-                        if (!users[username]) {
-                            users[username] = parsedUsers[username];
-                            if (username !== 'admin') {
-                                const selectElement = document.getElementById('adminUserSelect');
-                                const option = document.createElement('option');
-                                option.value = username;
-                                option.textContent = username;
-                                selectElement.appendChild(option);
+                // Always load from Firebase first for most up-to-date data
+                getFirebaseData('users', (firebaseUsers) => {
+                    if (firebaseUsers) {
+                        // Update the users object with Firebase data
+                        Object.keys(firebaseUsers).forEach(username => {
+                            users[username] = firebaseUsers[username];
+                        });
+
+                        // Update localStorage with the latest data
+                        localStorage.setItem('users', JSON.stringify(users));
+
+                        // Update the admin dropdown
+                        const selectElement = document.getElementById('adminUserSelect');
+                        if (selectElement) {
+                            // Clear existing options except the first one
+                            while (selectElement.options.length > 1) {
+                                selectElement.remove(1);
+                            }
+
+                            // Add all employees to the dropdown
+                            Object.keys(users).forEach(username => {
+                                if (username !== 'admin') {
+                                    const option = document.createElement('option');
+                                    option.value = username;
+                                    option.textContent = username;
+                                    selectElement.appendChild(option);
+                                }
+                            });
+                        }
+                    } else {
+                        // If Firebase has no data, use localStorage as backup
+                        const savedUsers = localStorage.getItem('users');
+                        if (savedUsers) {
+                            const parsedUsers = JSON.parse(savedUsers);
+
+                            // Update local users object
+                            Object.keys(parsedUsers).forEach(username => {
+                                if (!users[username]) {
+                                    users[username] = parsedUsers[username];
+                                }
+                            });
+
+                            // Upload to Firebase
+                            saveToFirebase('users', users);
+
+                            // Update the admin dropdown
+                            const selectElement = document.getElementById('adminUserSelect');
+                            if (selectElement) {
+                                // Clear existing options except the first one
+                                while (selectElement.options.length > 1) {
+                                    selectElement.remove(1);
+                                }
+
+                                // Add all employees
+                                Object.keys(users).forEach(username => {
+                                    if (username !== 'admin') {
+                                        const option = document.createElement('option');
+                                        option.value = username;
+                                        option.textContent = username;
+                                        selectElement.appendChild(option);
+                                    }
+                                });
                             }
                         }
-                    });
-                }
+                    }
+                });
             });
             const users = {
                 'admin': { password: 'admin123', role: 'admin' },
@@ -1094,27 +1168,67 @@
             document.getElementById('loginBtn').addEventListener('click', () => {
                 const username = document.getElementById('userName').value.toLowerCase();
                 const password = document.getElementById('userPassword').value;
-                const user = users[username];
-                if (user && user.password === password) {
-                    localStorage.setItem('loggedInUser', JSON.stringify({
-                        username,
-                        id: user.id,
-                        role: user.role
-                    }));
-                    if (user.role === 'admin') {
-                        showPage('adminPage');
-                        loadAdminData();
+
+                // First check Firebase for the most up-to-date user data
+                database.ref(`users/${username}`).once('value', (snapshot) => {
+                    const firebaseUser = snapshot.val();
+
+                    // Use Firebase data if available, otherwise fallback to local data
+                    const user = firebaseUser || users[username];
+
+                    if (user && user.password === password) {
+                        // Store login info in localStorage
+                        localStorage.setItem('loggedInUser', JSON.stringify({
+                            username,
+                            id: user.id,
+                            role: user.role
+                        }));
+
+                        // If Firebase didn't have this user, save it there
+                        if (!firebaseUser && users[username]) {
+                            saveToFirebase(`users/${username}`, users[username]);
+                        }
+
+                        if (user.role === 'admin') {
+                            showPage('adminPage');
+                            loadAdminData();
+                        } else {
+                            document.getElementById('employeeDetails').textContent = `${username} | ID: ${user.id}`;
+                            showPage('employeePage');
+                            loadAttendanceTable();
+                            updateSummaryValues();
+                            loadEmployeeHolidayRequests();
+                            showSection('attendance');
+                        }
                     } else {
-                        document.getElementById('employeeDetails').textContent = `${username} | ID: ${user.id}`;
-                        showPage('employeePage');
-                        loadAttendanceTable();
-                        updateSummaryValues();
-                        loadEmployeeHolidayRequests();
-                        showSection('attendance');
+                        alert('Invalid username or password');
                     }
-                } else {
-                    alert('Invalid username or password');
-                }
+                }, (error) => {
+                    console.error("Error checking Firebase for user:", error);
+
+                    // Fallback to local check if Firebase fails
+                    const user = users[username];
+                    if (user && user.password === password) {
+                        localStorage.setItem('loggedInUser', JSON.stringify({
+                            username,
+                            id: user.id,
+                            role: user.role
+                        }));
+                        if (user.role === 'admin') {
+                            showPage('adminPage');
+                            loadAdminData();
+                        } else {
+                            document.getElementById('employeeDetails').textContent = `${username} | ID: ${user.id}`;
+                            showPage('employeePage');
+                            loadAttendanceTable();
+                            updateSummaryValues();
+                            loadEmployeeHolidayRequests();
+                            showSection('attendance');
+                        }
+                    } else {
+                        alert('Invalid username or password');
+                    }
+                });
             });
             function showPage(pageId) {
                 ['loginPage', 'employeePage', 'adminPage'].forEach(id => {
@@ -1222,19 +1336,39 @@
                 const date = now.toLocaleDateString();
                 const day = now.toLocaleString('en-us', { weekday: 'long' });
                 const time = now.toLocaleTimeString();
-                let lateCheckIns = JSON.parse(localStorage.getItem('lateCheckIns')) || [];
-                // Record the late check-in
-                lateCheckIns.push({
-                    employee: employee,
-                    date: date,
-                    day: day,
-                    time: time,
+
+                // Get current data from Firebase first
+                getFirebaseData('lateCheckIns', (firebaseLateCheckIns) => {
+                    let lateCheckIns = firebaseLateCheckIns || JSON.parse(localStorage.getItem('lateCheckIns')) || [];
+
+                    // Record the late check-in
+                    lateCheckIns.push({
+                        employee: employee,
+                        date: date,
+                        day: day,
+                        time: time,
+                    });
+
+                    // Save to Firebase first
+                    saveToFirebase('lateCheckIns', lateCheckIns)
+                        .then(() => {
+                            // Then update localStorage
+                            localStorage.setItem('lateCheckIns', JSON.stringify(lateCheckIns));
+                            alert('Late check-in recorded successfully!');
+                            loadAttendanceTable();
+                            updateSummaryValues();
+                            sendNotification(employee);
+                        })
+                        .catch(error => {
+                            console.error('Error saving late check-in to Firebase:', error);
+                            // Still save to localStorage as backup
+                            localStorage.setItem('lateCheckIns', JSON.stringify(lateCheckIns));
+                            alert('Late check-in recorded in local storage. There was an issue syncing with the cloud.');
+                            loadAttendanceTable();
+                            updateSummaryValues();
+                            sendNotification(employee);
+                        });
                 });
-                localStorage.setItem('lateCheckIns', JSON.stringify(lateCheckIns));
-                alert('Late check-in recorded successfully!');
-                loadAttendanceTable();
-                updateSummaryValues();
-                sendNotification(employee);
             }
             //Function to send notification to the employee for missed checkins and update the notification count.
             function sendNotification(employee) {
@@ -1285,6 +1419,7 @@
                 loadAdminProgressReports(selectedUser);
                 loadAdminTimeTable(selectedUser);
                 loadAdminHolidayRequests(selectedUser);
+                loadAdminTasks(selectedUser);
             }
             function loadAdminData(selectedUser = '') {
                 const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
@@ -1459,77 +1594,128 @@
                     fileData: fileData,
                     status: 'Pending'
                 };
-                //Get existing progress reports and add a new one.
-                let progressReports = JSON.parse(localStorage.getItem('progressReports')) || [];
-                progressReports.push(progressReport);
-                //Save the progree report to localStorage.
-                localStorage.setItem('progressReports', JSON.stringify(progressReports));
-                document.getElementById('progressMessage').value = '';
-                document.getElementById('progressFile').value = '';
-                document.getElementById('fileName').textContent = '';
-                //Alert for successful submission for the progress report
-                alert('Progress report submitted successfully!');
-                loadEmployeeProgress();
+
+                // Get current progress reports from Firebase first
+                getFirebaseData('progressReports', (firebaseProgressReports) => {
+                    // Use Firebase data or fallback to localStorage
+                    let progressReports = firebaseProgressReports || JSON.parse(localStorage.getItem('progressReports')) || [];
+
+                    // Add new progress report
+                    progressReports.push(progressReport);
+
+                    // Save to Firebase first
+                    saveToFirebase('progressReports', progressReports)
+                        .then(() => {
+                            // Then update localStorage as backup
+                            localStorage.setItem('progressReports', JSON.stringify(progressReports));
+
+                            // Reset form
+                            document.getElementById('progressMessage').value = '';
+                            document.getElementById('progressFile').value = '';
+                            document.getElementById('fileName').textContent = '';
+
+                            alert('Progress report submitted successfully!');
+                            loadEmployeeProgress();
+                        })
+                        .catch(error => {
+                            console.error('Error saving progress report to Firebase:', error);
+
+                            // Still save to localStorage as backup
+                            localStorage.setItem('progressReports', JSON.stringify(progressReports));
+
+                            // Reset form
+                            document.getElementById('progressMessage').value = '';
+                            document.getElementById('progressFile').value = '';
+                            document.getElementById('fileName').textContent = '';
+
+                            alert('Progress report submitted successfully (saved locally)!');
+                            loadEmployeeProgress();
+                        });
+                });
             }
             function loadEmployeeProgress() {
                 const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-                const progressReports = JSON.parse(localStorage.getItem('progressReports')) || [];
                 const tableBody = document.getElementById('employeeProgressTable');
                 if (!tableBody) return; //Return/come out of the function if not on progress page.
                 tableBody.innerHTML = '';
-                // Filter and sort progress reports for current employee
-                progressReports
-                    .filter(report => report.employee === employee)
-                    .sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time))
-                    .forEach(report => {
-                        const statusClass = report.status.toLowerCase();
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${report.date}</td>
-                            <td>${report.time}</td>
-                            <td>${report.details}</td>
-                            <td>${report.fileName || 'No file'}</td>
-                            <td class="status-${statusClass}">${report.status}</td>
-                        `;
-                        tableBody.appendChild(row);
-                    });
+
+                // Get data from Firebase first
+                getFirebaseData('progressReports', (firebaseProgressReports) => {
+                    // Use Firebase data or fallback to localStorage
+                    const progressReports = firebaseProgressReports || JSON.parse(localStorage.getItem('progressReports')) || [];
+
+                    // Update localStorage with Firebase data if available
+                    if (firebaseProgressReports) {
+                        localStorage.setItem('progressReports', JSON.stringify(firebaseProgressReports));
+                    }
+
+                    // Filter and sort progress reports for current employee
+                    progressReports
+                        .filter(report => report.employee === employee)
+                        .sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time))
+                        .forEach(report => {
+                            const statusClass = report.status.toLowerCase();
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${report.date}</td>
+                                <td>${report.time}</td>
+                                <td>${report.details}</td>
+                                <td>${report.fileName || 'No file'}</td>
+                                <td class="status-${statusClass}">${report.status}</td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+                });
             }
             function loadAdminProgressReports(selectedUser = '') {
-                const progressReports = JSON.parse(localStorage.getItem('progressReports')) || [];
                 const tableBody = document.getElementById('adminProgressTable');
                 if (!tableBody) return;
                 tableBody.innerHTML = '';
-                const filteredReports = progressReports.filter(report => !selectedUser || report.employee === selectedUser);
-                if (selectedUser && filteredReports.length === 0) {
-                    const row = document.createElement('tr');
-                    row.innerHTML = '<td colspan="7" style="text-align: center;">No progress reports found for this employee</td>';
-                    tableBody.appendChild(row);
-                    return;
-                }
-                //Filter and sort progress reports Admin Page.
-                filteredReports.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + b.time))
-                    .forEach(report => {
-                        const fileDownloadButton = report.fileData ?
-                            `<button onclick="downloadFile('${report.fileName}', '${report.fileData}')" class="download-btn">Download</button>` :
-                            'No file';
+
+                // Get data from Firebase first
+                getFirebaseData('progressReports', (firebaseProgressReports) => {
+                    // Use Firebase data or fallback to localStorage
+                    const progressReports = firebaseProgressReports || JSON.parse(localStorage.getItem('progressReports')) || [];
+
+                    // Update localStorage with Firebase data if available
+                    if (firebaseProgressReports) {
+                        localStorage.setItem('progressReports', JSON.stringify(firebaseProgressReports));
+                    }
+
+                    const filteredReports = progressReports.filter(report => !selectedUser || report.employee === selectedUser);
+
+                    if (selectedUser && filteredReports.length === 0) {
                         const row = document.createElement('tr');
-                        row.innerHTML = `
-                        <td>${report.employee}</td>
-                        <td>${report.date}</td>
-                        <td>${report.time}</td>
-                        <td>${report.details}</td>
-                        <td>${report.fileName ? report.fileName : 'No file'}</td>
-                        <td>${fileDownloadButton}</td>
-                        <td>
-                            <select onchange="updateProgressStatus('${report.date} ${report.time}', this.value)">
-                                <option value="Pending" ${report.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                                <option value="Approved" ${report.status === 'Approved' ? 'selected' : ''}>Approved</option>
-                                <option value="Rejected" ${report.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
-                            </select>
-                        </td>
-                    `;
+                        row.innerHTML = '<td colspan="7" style="text-align: center;">No progress reports found for this employee</td>';
                         tableBody.appendChild(row);
-                    });
+                        return;
+                    }
+
+                    //Filter and sort progress reports Admin Page.
+                    filteredReports.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + b.time))
+                        .forEach(report => {
+                            const fileDownloadButton = report.fileData ?
+                                `<button onclick="downloadFile('${report.fileName}', '${report.fileData}')" class="download-btn">Download</button>` :
+                                'No file';
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                            <td>${report.employee}</td>
+                            <td>${report.date}</td>
+                            <td>${report.time}</td>
+                            <td>${report.details}</td>
+                            <td>${report.fileName ? report.fileName : 'No file'}</td>
+                            <td>${fileDownloadButton}</td>
+                            <td>
+                                <select onchange="updateProgressStatus('${report.date} ${report.time}', this.value)">
+                                    <option value="Pending" ${report.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="Approved" ${report.status === 'Approved' ? 'selected' : ''}>Approved</option>
+                                    <option value="Rejected" ${report.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                                </select>
+                            </td>
+                        `;
+                            tableBody.appendChild(row);
+                        });
+                });
             }
             function downloadFile(fileName, fileData) {
                 if (!fileData) {
@@ -1544,21 +1730,44 @@
                 document.body.removeChild(link);
             }
             function updateProgressStatus(datetime, newStatus) {
-                const progressReports = JSON.parse(localStorage.getItem('progressReports')) || [];
                 const [date, time] = datetime.split(' ');
-                const reportIndex = progressReports.findIndex(report =>
-                    report.date === date && report.time === time
-                );
-                if (reportIndex !== -1) {
-                    progressReports[reportIndex].status = newStatus;
-                    localStorage.setItem('progressReports', JSON.stringify(progressReports));
-                    // Refresh both admin and employee views
-                    loadAdminProgressReports(document.getElementById('adminUserSelect').value);
-                    loadEmployeeProgress();
-                }
+
+                // Get current data from Firebase first
+                getFirebaseData('progressReports', (firebaseProgressReports) => {
+                    let progressReports = firebaseProgressReports || JSON.parse(localStorage.getItem('progressReports')) || [];
+
+                    const reportIndex = progressReports.findIndex(report =>
+                        report.date === date && report.time === time
+                    );
+
+                    if (reportIndex !== -1) {
+                        progressReports[reportIndex].status = newStatus;
+
+                        // Save to Firebase first
+                        saveToFirebase('progressReports', progressReports)
+                            .then(() => {
+                                // Then update localStorage
+                                localStorage.setItem('progressReports', JSON.stringify(progressReports));
+
+                                // Refresh both admin and employee views
+                                loadAdminProgressReports(document.getElementById('adminUserSelect').value);
+                                loadEmployeeProgress();
+                            })
+                            .catch(error => {
+                                console.error('Error updating progress status in Firebase:', error);
+
+                                // Still save to localStorage as backup
+                                localStorage.setItem('progressReports', JSON.stringify(progressReports));
+
+                                // Refresh both admin and employee views
+                                loadAdminProgressReports(document.getElementById('adminUserSelect').value);
+                                loadEmployeeProgress();
+                            });
+                    }
+                });
             }
             function showAdminSection(sectionName) {
-                const sections = ['adminAttendance', 'adminProgress', 'adminHolidays', 'adminTimeTable'];
+                const sections = ['adminAttendance', 'adminProgress', 'adminHolidays', 'adminTimeTable', 'adminTargets'];
                 sections.forEach(section => {
                     const element = document.getElementById(section);
                     if (element) element.style.display = 'none';
@@ -1579,6 +1788,9 @@
                             break;
                         case 'adminTimeTable':
                             loadAdminTimeTable(selectedUser);
+                            break;
+                        case 'adminTargets':
+                            loadAdminTasks(selectedUser);
                             break;
                     }
                 }
@@ -1767,14 +1979,32 @@
                         checkOut: document.getElementById('saturdayCheckOut').value
                     }
                 };
-                //existing time tables
-                let timeTables = JSON.parse(localStorage.getItem('timeTables')) || [];
-                //Remove existing time table for this employee if it exists
-                timeTables = timeTables.filter(t => t.employee !== employee);
-                timeTables.push(timeTable);
-                localStorage.setItem('timeTables', JSON.stringify(timeTables));
-                closeTimeTableModal();
-                alert('Time table saved successfully!');
+
+                // Get current data from Firebase first
+                getFirebaseData('timeTables', (firebaseTimeTables) => {
+                    // Use Firebase data or fallback to localStorage
+                    let timeTables = firebaseTimeTables || JSON.parse(localStorage.getItem('timeTables')) || [];
+
+                    // Remove existing time table for this employee if it exists
+                    timeTables = timeTables.filter(t => t.employee !== employee);
+                    timeTables.push(timeTable);
+
+                    // Save to Firebase first
+                    saveToFirebase('timeTables', timeTables)
+                        .then(() => {
+                            // Then update localStorage
+                            localStorage.setItem('timeTables', JSON.stringify(timeTables));
+                            closeTimeTableModal();
+                            alert('Time table saved successfully!');
+                        })
+                        .catch(error => {
+                            console.error('Error saving time table to Firebase:', error);
+                            // Still save to localStorage as backup
+                            localStorage.setItem('timeTables', JSON.stringify(timeTables));
+                            closeTimeTableModal();
+                            alert('Time table saved to local storage. There was an issue syncing with the cloud.');
+                        });
+                });
             }
             //Admin Time Table Section.
             function loadAdminTimeTable(selectedUser = '') {
@@ -1814,7 +2044,7 @@
                 document.getElementById('modalOverlay').style.display = 'none';
             }
             function showAdminSection(sectionName) {
-                const sections = ['adminAttendance', 'adminProgress', 'adminHolidays', 'adminTimeTable'];
+                const sections = ['adminAttendance', 'adminProgress', 'adminHolidays', 'adminTimeTable', 'adminTargets'];
                 sections.forEach(section => {
                     const element = document.getElementById(section);
                     if (element) element.style.display = 'none';
@@ -1835,6 +2065,9 @@
                             break;
                         case 'adminTimeTable':
                             loadAdminTimeTable(selectedUser);
+                            break;
+                        case 'adminTargets':
+                            loadAdminTasks(selectedUser);
                             break;
                     }
                 }
@@ -1904,43 +2137,60 @@
                 const date = now.toLocaleDateString();
                 const day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
                 const time = now.toLocaleTimeString();
-                //Get existing records
-                let attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
-                //Find if there's an existing record for today
-                const recordIndex = attendanceRecords.findIndex(record =>
-                    record.employee === employee && record.date === date
-                );
-                if (recordIndex === -1) {
-                    //If no record exists for today, create one
-                    const newRecord = {
-                        employee: employee,
-                        date: date,
-                        day: day
-                    };
-                    if (type === 'checkIn') {
-                        newRecord.checkIn = time;
-                    } else if (type === 'checkOut') {
-                        newRecord.checkOut = time;
-                    }
-                    attendanceRecords.push(newRecord);
-                } else {
-                    //update existing record.
-                    if (type === 'checkIn') {
-                        attendanceRecords[recordIndex].checkIn = time;
-                    } else if (type === 'checkOut') {
-                        //handle multiple checkouts.
-                        if (Array.isArray(attendanceRecords[recordIndex].checkOut)) {
-                            attendanceRecords[recordIndex].checkOut.push(time);
-                        } else if (attendanceRecords[recordIndex].checkOut) {
-                            attendanceRecords[recordIndex].checkOut = [attendanceRecords[recordIndex].checkOut, time];
-                        } else {
-                            attendanceRecords[recordIndex].checkOut = time;
+
+                // Get current records from Firebase first
+                getFirebaseData('attendanceRecords', (firebaseRecords) => {
+                    //Get existing records
+                    let attendanceRecords = firebaseRecords || JSON.parse(localStorage.getItem('attendanceRecords')) || [];
+
+                    //Find if there's an existing record for today
+                    const recordIndex = attendanceRecords.findIndex(record =>
+                        record.employee === employee && record.date === date
+                    );
+
+                    if (recordIndex === -1) {
+                        //If no record exists for today, create one
+                        const newRecord = {
+                            employee: employee,
+                            date: date,
+                            day: day
+                        };
+                        if (type === 'checkIn') {
+                            newRecord.checkIn = time;
+                        } else if (type === 'checkOut') {
+                            newRecord.checkOut = time;
+                        }
+                        attendanceRecords.push(newRecord);
+                    } else {
+                        //update existing record.
+                        if (type === 'checkIn') {
+                            attendanceRecords[recordIndex].checkIn = time;
+                        } else if (type === 'checkOut') {
+                            //handle multiple checkouts.
+                            if (Array.isArray(attendanceRecords[recordIndex].checkOut)) {
+                                attendanceRecords[recordIndex].checkOut.push(time);
+                            } else if (attendanceRecords[recordIndex].checkOut) {
+                                attendanceRecords[recordIndex].checkOut = [attendanceRecords[recordIndex].checkOut, time];
+                            } else {
+                                attendanceRecords[recordIndex].checkOut = time;
+                            }
                         }
                     }
-                }
-                //Save updated records.
-                localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
-                updateSummaryValues();
+
+                    // Save to Firebase
+                    saveToFirebase('attendanceRecords', attendanceRecords)
+                        .then(() => {
+                            // Save to localStorage as backup
+                            localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
+                            updateSummaryValues();
+                        })
+                        .catch(error => {
+                            console.error('Error saving attendance record to Firebase:', error);
+                            // Still save to localStorage as backup
+                            localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
+                            updateSummaryValues();
+                        });
+                });
             }
             function formatTimeToAMPM(time) {
                 if (!time) return '-';
@@ -2138,33 +2388,46 @@
             }
             // Task Management Functions
             function loadAdminTasks(selectedUser = '') {
-                const tasks = JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                const tableBody = document.getElementById('adminTasksTable');
-                if (!tableBody) return;
-                tableBody.innerHTML = '';
-                if (!selectedUser) {
-                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Please select an employee first</td></tr>';
-                    return;
-                }
-                const filteredTasks = tasks.filter(task => task.employee === selectedUser);
-                if (filteredTasks.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No tasks assigned yet</td></tr>';
-                    return;
-                }
-                filteredTasks.forEach(task => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-            <td>${task.date}</td>
-            <td>${task.day}</td>
-            <td>${task.description}</td>
-            <td>${task.fileName ? `<span class="file-icon">📎</span> ${task.fileName}` : 'No file'}</td>
-            <td>${task.status}</td>
-            <td>${task.comment}</td>
-            <td>
-                <button onclick="deleteTask(${task.id})">Delete</button>
-            </td>
-        `;
-                    tableBody.appendChild(row);
+                // Get tasks from Firebase first
+                getFirebaseData('employeeTasks', (firebaseTasks) => {
+                    // Use Firebase data or fallback to localStorage
+                    const tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
+                    
+                    // Update localStorage with the latest data from Firebase
+                    if (firebaseTasks) {
+                        localStorage.setItem('employeeTasks', JSON.stringify(firebaseTasks));
+                    }
+                    
+                    const tableBody = document.getElementById('adminTasksTable');
+                    if (!tableBody) return;
+                    tableBody.innerHTML = '';
+                    
+                    if (!selectedUser) {
+                        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Please select an employee first</td></tr>';
+                        return;
+                    }
+                    
+                    const filteredTasks = tasks.filter(task => task.employee === selectedUser);
+                    if (filteredTasks.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No tasks assigned yet</td></tr>';
+                        return;
+                    }
+                    
+                    filteredTasks.forEach(task => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                <td>${task.date}</td>
+                <td>${task.day}</td>
+                <td>${task.description}</td>
+                <td>${task.fileName ? `<span class="file-icon">📎</span> ${task.fileName}` : 'No file'}</td>
+                <td>${task.status}</td>
+                <td>${task.comment}</td>
+                <td>
+                    <button onclick="deleteTask(${task.id})">Delete</button>
+                </td>
+            `;
+                        tableBody.appendChild(row);
+                    });
                 });
             }
             function addNewTask() {
@@ -2184,26 +2447,53 @@
                 }
                 const reader = new FileReader();
                 reader.onload = function (e) {
-                    let tasks = JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                    const newTask = {
-                        id: Date.now(),
-                        employee: selectedUser,
-                        date: taskDate,
-                        day: taskDay,
-                        description: taskDescription,
-                        fileName: taskFile ? taskFile.name : '',
-                        fileData: taskFile ? e.target.result : '',
-                        status: 'Pending',
-                        comment: '',
-                        saved: true
-                    };
-                    tasks.push(newTask);
-                    localStorage.setItem('employeeTasks', JSON.stringify(tasks));
-                    loadAdminTasks(selectedUser);
-                    document.getElementById('taskDate').value = '';
-                    document.getElementById('taskDay').value = '';
-                    document.getElementById('taskDescription').value = '';
-                    taskFileInput.value = '';
+                    // Get latest tasks from Firebase first
+                    getFirebaseData('employeeTasks', (firebaseTasks) => {
+                        let tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
+                        
+                        const newTask = {
+                            id: Date.now(),
+                            employee: selectedUser,
+                            date: taskDate,
+                            day: taskDay,
+                            description: taskDescription,
+                            fileName: taskFile ? taskFile.name : '',
+                            fileData: taskFile ? e.target.result : '',
+                            status: 'Pending',
+                            comment: '',
+                            saved: true
+                        };
+                        
+                        tasks.push(newTask);
+                        
+                        // Save to Firebase first
+                        saveToFirebase('employeeTasks', tasks)
+                            .then(() => {
+                                // Also save to localStorage
+                                localStorage.setItem('employeeTasks', JSON.stringify(tasks));
+                                loadAdminTasks(selectedUser);
+                                
+                                // Reset form
+                                document.getElementById('taskDate').value = '';
+                                document.getElementById('taskDay').value = '';
+                                document.getElementById('taskDescription').value = '';
+                                taskFileInput.value = '';
+                            })
+                            .catch(error => {
+                                console.error('Error saving new task to Firebase:', error);
+                                // Still save to localStorage as backup
+                                localStorage.setItem('employeeTasks', JSON.stringify(tasks));
+                                loadAdminTasks(selectedUser);
+                                
+                                // Reset form
+                                document.getElementById('taskDate').value = '';
+                                document.getElementById('taskDay').value = '';
+                                document.getElementById('taskDescription').value = '';
+                                taskFileInput.value = '';
+                                
+                                alert('Task added and saved locally. There was an issue syncing with the cloud.');
+                            });
+                    });
                 };
                 if (taskFile) {
                     reader.readAsDataURL(taskFile);
@@ -2212,38 +2502,93 @@
                 }
             }
             function updateTaskField(taskId, field, value) {
-                let tasks = JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                const taskIndex = tasks.findIndex(t => t.id === taskId);
-                if (taskIndex !== -1) {
-                    tasks[taskIndex][field] = value;
-                    localStorage.setItem('employeeTasks', JSON.stringify(tasks));
-                }
+                // Get latest tasks from Firebase first
+                getFirebaseData('employeeTasks', (firebaseTasks) => {
+                    let tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
+                    
+                    const taskIndex = tasks.findIndex(t => t.id === taskId);
+                    if (taskIndex !== -1) {
+                        tasks[taskIndex][field] = value;
+                        
+                        // Save to Firebase
+                        saveToFirebase('employeeTasks', tasks)
+                            .then(() => {
+                                // Also update localStorage
+                                localStorage.setItem('employeeTasks', JSON.stringify(tasks));
+                            })
+                            .catch(error => {
+                                console.error('Error updating task field in Firebase:', error);
+                                // Still save to localStorage as backup
+                                localStorage.setItem('employeeTasks', JSON.stringify(tasks));
+                            });
+                    }
+                });
             }
             function handleTaskFile(taskId, input) {
                 if (input.files && input.files[0]) {
                     const file = input.files[0];
                     const reader = new FileReader();
                     reader.onload = function (e) {
-                        let tasks = JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                        const taskIndex = tasks.findIndex(t => t.id === taskId);
-                        if (taskIndex !== -1) {
-                            tasks[taskIndex].fileName = file.name;
-                            tasks[taskIndex].fileData = e.target.result;
-                            localStorage.setItem('employeeTasks', JSON.stringify(tasks));
-                            const selectedUser = document.getElementById('adminUserSelect').value;
-                            loadAdminTasks(selectedUser);
-                        }
+                        // Get latest tasks from Firebase first
+                        getFirebaseData('employeeTasks', (firebaseTasks) => {
+                            let tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
+                            
+                            const taskIndex = tasks.findIndex(t => t.id === taskId);
+                            if (taskIndex !== -1) {
+                                tasks[taskIndex].fileName = file.name;
+                                tasks[taskIndex].fileData = e.target.result;
+                                
+                                // Save to Firebase
+                                saveToFirebase('employeeTasks', tasks)
+                                    .then(() => {
+                                        // Also update localStorage
+                                        localStorage.setItem('employeeTasks', JSON.stringify(tasks));
+                                        
+                                        const selectedUser = document.getElementById('adminUserSelect').value;
+                                        loadAdminTasks(selectedUser);
+                                    })
+                                    .catch(error => {
+                                        console.error('Error saving task file to Firebase:', error);
+                                        // Still save to localStorage as backup
+                                        localStorage.setItem('employeeTasks', JSON.stringify(tasks));
+                                        
+                                        const selectedUser = document.getElementById('adminUserSelect').value;
+                                        loadAdminTasks(selectedUser);
+                                    });
+                            }
+                        });
                     };
                     reader.readAsDataURL(file);
                 }
             }
             function deleteTask(taskId) {
                 if (confirm('Are you sure you want to delete this task?')) {
-                    let tasks = JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                    tasks = tasks.filter(t => t.id !== taskId);
-                    localStorage.setItem('employeeTasks', JSON.stringify(tasks));
-                    const selectedUser = document.getElementById('adminUserSelect').value;
-                    loadAdminTasks(selectedUser);
+                    // Get latest tasks from Firebase first
+                    getFirebaseData('employeeTasks', (firebaseTasks) => {
+                        let tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
+                        
+                        tasks = tasks.filter(t => t.id !== taskId);
+                        
+                        // Save to Firebase
+                        saveToFirebase('employeeTasks', tasks)
+                            .then(() => {
+                                // Also update localStorage
+                                localStorage.setItem('employeeTasks', JSON.stringify(tasks));
+                                
+                                const selectedUser = document.getElementById('adminUserSelect').value;
+                                loadAdminTasks(selectedUser);
+                            })
+                            .catch(error => {
+                                console.error('Error deleting task from Firebase:', error);
+                                // Still save to localStorage as backup
+                                localStorage.setItem('employeeTasks', JSON.stringify(tasks));
+                                
+                                const selectedUser = document.getElementById('adminUserSelect').value;
+                                loadAdminTasks(selectedUser);
+                                
+                                alert('Task deleted locally. There was an issue syncing with the cloud.');
+                            });
+                    });
                 }
             }
             function saveTask(taskId) {
@@ -2289,81 +2634,149 @@
             // Employee Task Management Functions
             function loadEmployeeTasks() {
                 const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-                const tasks = JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                const tableBody = document.getElementById('employeeTasksTable');
-                if (!tableBody) return;
-                tableBody.innerHTML = '';
-                const employeeTasks = tasks.filter(task =>
-                    task.employee.trim() === employee.trim() && task.saved
-                ).sort((a, b) => new Date(b.date) - new Date(a.date));
-                if (employeeTasks.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No tasks assigned</td></tr>';
-                    return;
-                }
-                employeeTasks.forEach(task => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-            <td>${new Date(task.date).toLocaleDateString()}</td>
-            <td>${new Date(task.date).toLocaleString('en-US', { weekday: 'long' })}</td>
-            <td>${task.description}</td>
-            <td>${task.fileName ?
-                            `<button onclick="downloadTaskFile('${task.fileName}', '${task.fileData}')">Download</button>` :
-                            'No file'}</td>
-            <td>
-                <select onchange="updateEmployeeTaskStatus(${task.id}, this.value)">
-                    <option value="Pending" ${task.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                    <option value="Completed" ${task.status === 'Completed' ? 'selected' : ''}>Completed</option>
-                    <option value="Not Achieved" ${task.status === 'Not Achieved' ? 'selected' : ''}>Not Achieved</option>
-                </select>
-            </td>
-            <td>
-                <input type="text" value="${task.comment || ''}" 
-                    onchange="updateEmployeeTaskComment(${task.id}, this.value)" 
-                    placeholder="Add comment here">
-            </td>
-            <td>
-                <button onclick="saveEmployeeTaskChanges(${task.id})">Save Changes</button>
-            </td>
-        `;
-                    tableBody.appendChild(row);
+                
+                // Get tasks from Firebase first
+                getFirebaseData('employeeTasks', (firebaseTasks) => {
+                    // Use Firebase data or fallback to localStorage
+                    const tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
+                    
+                    // Update localStorage with the latest data from Firebase
+                    if (firebaseTasks) {
+                        localStorage.setItem('employeeTasks', JSON.stringify(firebaseTasks));
+                    }
+                    
+                    const tableBody = document.getElementById('employeeTasksTable');
+                    if (!tableBody) return;
+                    tableBody.innerHTML = '';
+                    
+                    const employeeTasks = tasks.filter(task =>
+                        task.employee.trim() === employee.trim() && task.saved
+                    ).sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    if (employeeTasks.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No tasks assigned</td></tr>';
+                        return;
+                    }
+                    
+                    employeeTasks.forEach(task => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                <td>${new Date(task.date).toLocaleDateString()}</td>
+                <td>${new Date(task.date).toLocaleString('en-US', { weekday: 'long' })}</td>
+                <td>${task.description}</td>
+                <td>${task.fileName ?
+                                `<button onclick="downloadTaskFile('${task.fileName}', '${task.fileData}')">Download</button>` :
+                                'No file'}</td>
+                <td>
+                    <select onchange="updateEmployeeTaskStatus(${task.id}, this.value)">
+                        <option value="Pending" ${task.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                        <option value="Completed" ${task.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                        <option value="Not Achieved" ${task.status === 'Not Achieved' ? 'selected' : ''}>Not Achieved</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="text" value="${task.comment || ''}" 
+                        onchange="updateEmployeeTaskComment(${task.id}, this.value)" 
+                        placeholder="Add comment here">
+                </td>
+                <td>
+                    <button onclick="saveEmployeeTaskChanges(${task.id})">Save Changes</button>
+                </td>
+            `;
+                        tableBody.appendChild(row);
+                    });
                 });
             }
             function updateEmployeeTaskStatus(taskId, status) {
-                let tasks = JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                const taskIndex = tasks.findIndex(t => t.id === taskId);
-                if (taskIndex !== -1) {
-                    tasks[taskIndex].status = status;
-                    tasks[taskIndex].lastModified = new Date().toISOString();
-                    localStorage.setItem('employeeTasks', JSON.stringify(tasks));
-                    if (status === 'Not Achieved' && !tasks[taskIndex].comment) {
-                        alert('Please add Reason explaining why the task was not achieved.');
+                // Get latest tasks from Firebase first
+                getFirebaseData('employeeTasks', (firebaseTasks) => {
+                    let tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
+                    
+                    const taskIndex = tasks.findIndex(t => t.id === taskId);
+                    if (taskIndex !== -1) {
+                        tasks[taskIndex].status = status;
+                        tasks[taskIndex].lastModified = new Date().toISOString();
+                        
+                        if (status === 'Not Achieved' && !tasks[taskIndex].comment) {
+                            alert('Please add Reason explaining why the task was not achieved.');
+                        }
+                        
+                        // Save to Firebase
+                        saveToFirebase('employeeTasks', tasks)
+                            .then(() => {
+                                // Also update localStorage
+                                localStorage.setItem('employeeTasks', JSON.stringify(tasks));
+                            })
+                            .catch(error => {
+                                console.error('Error saving task status to Firebase:', error);
+                                // Still save to localStorage as backup
+                                localStorage.setItem('employeeTasks', JSON.stringify(tasks));
+                            });
                     }
-                    saveEmployeeTaskChanges(taskId);
-                }
+                });
             }
             function updateEmployeeTaskComment(taskId, comment) {
-                let tasks = JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                const taskIndex = tasks.findIndex(t => t.id === taskId);
-                if (taskIndex !== -1) {
-                    tasks[taskIndex].comment = comment;
-                    tasks[taskIndex].lastModified = new Date().toISOString();
-                    localStorage.setItem('employeeTasks', JSON.stringify(tasks));
-                }
+                // Get latest tasks from Firebase first
+                getFirebaseData('employeeTasks', (firebaseTasks) => {
+                    let tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
+                    
+                    const taskIndex = tasks.findIndex(t => t.id === taskId);
+                    if (taskIndex !== -1) {
+                        tasks[taskIndex].comment = comment;
+                        tasks[taskIndex].lastModified = new Date().toISOString();
+                        
+                        // Save to Firebase
+                        saveToFirebase('employeeTasks', tasks)
+                            .then(() => {
+                                // Also update localStorage
+                                localStorage.setItem('employeeTasks', JSON.stringify(tasks));
+                            })
+                            .catch(error => {
+                                console.error('Error saving task comment to Firebase:', error);
+                                // Still save to localStorage as backup
+                                localStorage.setItem('employeeTasks', JSON.stringify(tasks));
+                            });
+                    }
+                });
             }
             function saveEmployeeTaskChanges(taskId) {
-                let tasks = JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                const taskIndex = tasks.findIndex(t => t.id === taskId);
-                if (taskIndex !== -1) {
-                    tasks[taskIndex].lastModified = new Date().toISOString();
-                    localStorage.setItem('employeeTasks', JSON.stringify(tasks));
-                    alert('Changes saved successfully!');
-                    loadEmployeeTasks();
-                    // Refresh admin panel if it's open
-                    if (document.getElementById('adminPage').style.display !== 'none') {
-                        const selectedUser = document.getElementById('adminUserSelect').value;
-                        loadAdminTasks(selectedUser);
+                // Get latest tasks from Firebase first
+                getFirebaseData('employeeTasks', (firebaseTasks) => {
+                    let tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
+                    
+                    const taskIndex = tasks.findIndex(t => t.id === taskId);
+                    if (taskIndex !== -1) {
+                        tasks[taskIndex].lastModified = new Date().toISOString();
+                        
+                        // Save to Firebase
+                        saveToFirebase('employeeTasks', tasks)
+                            .then(() => {
+                                // Also update localStorage
+                                localStorage.setItem('employeeTasks', JSON.stringify(tasks));
+                                alert('Changes saved successfully!');
+                                loadEmployeeTasks();
+                                
+                                // Refresh admin panel if it's open
+                                if (document.getElementById('adminPage').style.display !== 'none') {
+                                    const selectedUser = document.getElementById('adminUserSelect').value;
+                                    loadAdminTasks(selectedUser);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error saving task changes to Firebase:', error);
+                                // Still save to localStorage as backup
+                                localStorage.setItem('employeeTasks', JSON.stringify(tasks));
+                                alert('Changes saved locally. There was an issue syncing with the cloud.');
+                                loadEmployeeTasks();
+                                
+                                // Refresh admin panel if it's open
+                                if (document.getElementById('adminPage').style.display !== 'none') {
+                                    const selectedUser = document.getElementById('adminUserSelect').value;
+                                    loadAdminTasks(selectedUser);
+                                }
+                            });
                     }
-                }
+                });
             }
             function downloadTaskFile(fileName, fileData) {
                 const link = document.createElement('a');
@@ -2375,62 +2788,135 @@
             }
             function handleCheckOut() {
                 const now = new Date();
-                addAttendanceRecord('checkOut');
-                alert('Check-out successful! Time recorded: ' + now.toLocaleTimeString());
-                loadAttendanceTable();
+
+                // Get current records from Firebase first
+                getFirebaseData('attendanceRecords', (firebaseRecords) => {
+                    let attendanceRecords = firebaseRecords || JSON.parse(localStorage.getItem('attendanceRecords')) || [];
+
+                    const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
+                    const date = now.toLocaleDateString();
+                    const day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
+                    const time = now.toLocaleTimeString();
+
+                    // Find if there's an existing record for today
+                    const recordIndex = attendanceRecords.findIndex(record =>
+                        record.employee === employee && record.date === date
+                    );
+
+                    if (recordIndex === -1) {
+                        // If no record exists for today, create one
+                        const newRecord = {
+                            employee: employee,
+                            date: date,
+                            day: day,
+                            checkOut: time
+                        };
+                        attendanceRecords.push(newRecord);
+                    } else {
+                        // Update existing record
+                        if (Array.isArray(attendanceRecords[recordIndex].checkOut)) {
+                            attendanceRecords[recordIndex].checkOut.push(time);
+                        } else if (attendanceRecords[recordIndex].checkOut) {
+                            attendanceRecords[recordIndex].checkOut = [attendanceRecords[recordIndex].checkOut, time];
+                        } else {
+                            attendanceRecords[recordIndex].checkOut = time;
+                        }
+                    }
+
+                    // Save to Firebase
+                    saveToFirebase('attendanceRecords', attendanceRecords)
+                        .then(() => {
+                            // Save to localStorage as backup
+                            localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
+                            alert('Check-out successful! Time recorded: ' + time);
+                            loadAttendanceTable();
+                            updateSummaryValues();
+                        })
+                        .catch(error => {
+                            console.error('Error saving attendance record to Firebase:', error);
+                            localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
+                            alert('Check-out successful! Time recorded: ' + time);
+                            loadAttendanceTable();
+                            updateSummaryValues();
+                        });
+                });
             }
             function loadAttendanceTable() {
                 const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-                const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
-                const lateCheckIns = JSON.parse(localStorage.getItem('lateCheckIns')) || [];
-                const tableBody = document.getElementById('attendanceTable');
-                if (!tableBody) return;
-                tableBody.innerHTML = '';
-                // Get all unique dates from both attendance records and late check-ins
-                const allDates = new Set();
-                // Add dates from attendance records
-                attendanceRecords
-                    .filter(record => record.employee === employee)
-                    .forEach(record => allDates.add(record.date));
-                lateCheckIns
-                    .filter(late => late.employee === employee)
-                    .forEach(late => allDates.add(late.date));
-                const sortedDates = Array.from(allDates).sort((a, b) => new Date(b) - new Date(a));
-                sortedDates.forEach(date => {
-                    const record = attendanceRecords.find(r => r.employee === employee && r.date === date);
-                    const lateCheckInsForDate = lateCheckIns
-                        .filter(late => late.employee === employee && late.date === date)
-                        .sort((a, b) => new Date(b.time) - new Date(a.time));
-                    const checkOutTimes = record && record.checkOut ?
-                        (Array.isArray(record.checkOut) ? record.checkOut : [record.checkOut]) : [];
-                    const row = document.createElement('tr');
-                    const day = record ? record.day :
-                        (lateCheckInsForDate.length > 0 ? lateCheckInsForDate[0].day : '');
-                    row.innerHTML = `
-                    <td>${date}</td>
-                    <td>${day}</td>
-                    <td>${record && record.checkIn ? record.checkIn : '-'}</td>
-                    <td>${checkOutTimes.length > 0 ? checkOutTimes[0] : '-'}</td>
-                    <td>${lateCheckInsForDate.length > 0 ? lateCheckInsForDate[0].time : '-'}</td>
-                `;
-                    tableBody.appendChild(row);
-                    // Calculate how many additional rows we need
-                    const maxAdditionalEntries = Math.max(
-                        checkOutTimes.length > 1 ? checkOutTimes.length - 1 : 0,
-                        lateCheckInsForDate.length > 1 ? lateCheckInsForDate.length - 1 : 0
-                    );
-                    // Add additional rows if needed
-                    for (let i = 0; i < maxAdditionalEntries; i++) {
-                        const additionalRow = document.createElement('tr');
-                        additionalRow.innerHTML = `
-                        <td>${date}</td>
-                        <td>${day}</td>
-                        <td>-</td>
-                        <td>${i + 1 < checkOutTimes.length ? checkOutTimes[i + 1] : '-'}</td>
-                        <td>${i + 1 < lateCheckInsForDate.length ? lateCheckInsForDate[i + 1].time : '-'}</td>
-                    `;
-                        tableBody.appendChild(additionalRow);
-                    }
+
+                // Get attendance data from Firebase first
+                getFirebaseData('attendanceRecords', (firebaseAttendanceRecords) => {
+                    getFirebaseData('lateCheckIns', (firebaseLateCheckIns) => {
+                        // Use Firebase data or fallback to localStorage
+                        const attendanceRecords = firebaseAttendanceRecords || JSON.parse(localStorage.getItem('attendanceRecords')) || [];
+                        const lateCheckIns = firebaseLateCheckIns || JSON.parse(localStorage.getItem('lateCheckIns')) || [];
+
+                        // Update localStorage with the latest data from Firebase
+                        if (firebaseAttendanceRecords) {
+                            localStorage.setItem('attendanceRecords', JSON.stringify(firebaseAttendanceRecords));
+                        }
+                        if (firebaseLateCheckIns) {
+                            localStorage.setItem('lateCheckIns', JSON.stringify(firebaseLateCheckIns));
+                        }
+
+                        const tableBody = document.getElementById('attendanceTable');
+                        if (!tableBody) return;
+                        tableBody.innerHTML = '';
+
+                        // Get all unique dates from both attendance records and late check-ins
+                        const allDates = new Set();
+                        // Add dates from attendance records
+                        attendanceRecords
+                            .filter(record => record.employee === employee)
+                            .forEach(record => allDates.add(record.date));
+                        lateCheckIns
+                            .filter(late => late.employee === employee)
+                            .forEach(late => allDates.add(late.date));
+
+                        const sortedDates = Array.from(allDates).sort((a, b) => new Date(b) - new Date(a));
+
+                        sortedDates.forEach(date => {
+                            const record = attendanceRecords.find(r => r.employee === employee && r.date === date);
+                            const lateCheckInsForDate = lateCheckIns
+                                .filter(late => late.employee === employee && late.date === date)
+                                .sort((a, b) => new Date(b.time) - new Date(a.time));
+
+                            const checkOutTimes = record && record.checkOut ?
+                                (Array.isArray(record.checkOut) ? record.checkOut : [record.checkOut]) : [];
+
+                            const row = document.createElement('tr');
+                            const day = record ? record.day :
+                                (lateCheckInsForDate.length > 0 ? lateCheckInsForDate[0].day : '');
+
+                            row.innerHTML = `
+                            <td>${date}</td>
+                            <td>${day}</td>
+                            <td>${record && record.checkIn ? record.checkIn : '-'}</td>
+                            <td>${checkOutTimes.length > 0 ? checkOutTimes[0] : '-'}</td>
+                            <td>${lateCheckInsForDate.length > 0 ? lateCheckInsForDate[0].time : '-'}</td>
+                        `;
+                            tableBody.appendChild(row);
+
+                            // Calculate how many additional rows we need
+                            const maxAdditionalEntries = Math.max(
+                                checkOutTimes.length > 1 ? checkOutTimes.length - 1 : 0,
+                                lateCheckInsForDate.length > 1 ? lateCheckInsForDate.length - 1 : 0
+                            );
+
+                            // Add additional rows if needed
+                            for (let i = 0; i < maxAdditionalEntries; i++) {
+                                const additionalRow = document.createElement('tr');
+                                additionalRow.innerHTML = `
+                                <td>${date}</td>
+                                <td>${day}</td>
+                                <td>-</td>
+                                <td>${i + 1 < checkOutTimes.length ? checkOutTimes[i + 1] : '-'}</td>
+                                <td>${i + 1 < lateCheckInsForDate.length ? lateCheckInsForDate[i + 1].time : '-'}</td>
+                            `;
+                                tableBody.appendChild(additionalRow);
+                            }
+                        });
+                    });
                 });
             }
             function addAttendanceRecord(type) {
@@ -2528,6 +3014,107 @@
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both start and end days
                 return diffDays;
             }
+            // Setup initial data listeners and sync
+            function setupDataListeners() {
+                // Get initial data from Firebase and update localStorage
+                const dataKeys = [
+                    'users',
+                    'attendanceRecords',
+                    'lateCheckIns',
+                    'missedCheckIns',
+                    'holidayRequests',
+                    'progressReports',
+                    'timeTables',
+                    'employeeTasks',
+                    'notifications'
+                ];
+                dataKeys.forEach(key => {
+                    getFirebaseData(key, (data) => {
+                        if (data) {
+                            localStorage.setItem(key, JSON.stringify(data));
+                        }
+                    });
+                });
+                //Listen for changes in the Firebase Database in real time
+                listenForChanges('users', (users) => {
+                    if (users) {
+                        localStorage.setItem('users', JSON.stringify(users));
+                        //Update the select dropdown in the Admin page
+                        const selectElement = document.getElementById('adminUserSelect');
+                        if (selectElement) {
+                            while (selectElement.options.length > 1) {
+                                selectElement.remove(1);
+                            }
+                            Object.keys(users).forEach(username => {
+                                if (username !== 'admin') {
+                                    const option = document.createElement('option');
+                                    option.value = username;
+                                    option.textContent = username;
+                                    selectElement.appendChild(option);
+                                }
+                            });
+                        }
+                    }
+                });
+                listenForChanges('attendanceRecords', (attendanceRecords) => {
+                    if (attendanceRecords) {
+                        localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
+                        loadAttendanceTable();
+                        updateSummaryValues();
+                    }
+                });
+                listenForChanges('lateCheckIns', (lateCheckIns) => {
+                    if (lateCheckIns) {
+                        localStorage.setItem('lateCheckIns', JSON.stringify(lateCheckIns));
+                        loadAttendanceTable();
+                        updateSummaryValues();
+                    }
+                });
+                listenForChanges('missedCheckIns', (missedCheckIns) => {
+                    if (missedCheckIns) localStorage.setItem('missedCheckIns', JSON.stringify(missedCheckIns));
+                });
+                listenForChanges('holidayRequests', (holidayRequests) => {
+                    if (holidayRequests) {
+                        localStorage.setItem('holidayRequests', JSON.stringify(holidayRequests));
+                        loadEmployeeHolidayRequests();
+                        loadAdminHolidayRequests();
+                    }
+                });
+                listenForChanges('progressReports', (progressReports) => {
+                    if (progressReports) {
+                        localStorage.setItem('progressReports', JSON.stringify(progressReports));
+                        loadEmployeeProgress();
+                        loadAdminProgressReports();
+                    }
+                });
+                listenForChanges('timeTables', (timeTables) => {
+                    if (timeTables) localStorage.setItem('timeTables', JSON.stringify(timeTables));
+                });
+                listenForChanges('notifications', (notifications) => {
+                    if (notifications) localStorage.setItem('notifications', JSON.stringify(notifications));
+                });
+
+                listenForChanges('employeeTasks', (tasks) => {
+                    if (tasks) {
+                        localStorage.setItem('employeeTasks', JSON.stringify(tasks));
+
+                        // Refresh tasks view if currently visible
+                        if (document.getElementById('employeePage').style.display !== 'none' &&
+                            document.getElementById('employeeTasks-section').style.display === 'block') {
+                            loadEmployeeTasks();
+                        }
+
+                        // Refresh admin tasks view if currently visible
+                        if (document.getElementById('adminPage').style.display !== 'none' &&
+                            document.getElementById('adminTargets').style.display === 'block') {
+                            const selectedUser = document.getElementById('adminUserSelect').value;
+                            if (selectedUser) loadAdminTasks(selectedUser);
+                        }
+                    }
+                });
+            }
+            window.addEventListener('load', setupDataListeners);
         </script>
 </body>
+
 </html>

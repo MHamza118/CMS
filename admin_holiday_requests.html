@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Holiday Requests - Admin Panel</title>
     <link rel="stylesheet" href="style.css" />
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="firebase.js"></script>
@@ -154,22 +154,31 @@
         });
       }
       function updateStatus(requestIndex, status) {
-        const requests =
-          JSON.parse(localStorage.getItem("holidayRequests")) || [];
-        if (requests[requestIndex]) {
-          requests[requestIndex].status = status;
-          localStorage.setItem("holidayRequests", JSON.stringify(requests));
-          const row = document.getElementById("holidayRequestsTable").children[
-            requestIndex
-          ];
-          if (row) {
-            const statusCell = row.children[5];
-            statusCell.innerHTML = `<span class="status-${status}">${
-              status.charAt(0).toUpperCase() + status.slice(1)
-            }</span>`;
-            const actionsCell = row.children[6];
-            actionsCell.innerHTML = "";
-          }
+        // Get current holiday requests from Firebase
+        getFirebaseData("holidayRequests", (firebaseRequests) => {
+          const requests = firebaseRequests || 
+            JSON.parse(localStorage.getItem("holidayRequests")) || [];
+            
+          if (requests[requestIndex]) {
+            requests[requestIndex].status = status;
+            
+            // Save to Firebase
+            saveToFirebase("holidayRequests", requests)
+              .then(() => {
+                // Also save to localStorage as backup
+                localStorage.setItem("holidayRequests", JSON.stringify(requests));
+                
+                const row = document.getElementById("holidayRequestsTable").children[
+                  requestIndex
+                ];
+                if (row) {
+                  const statusCell = row.children[5];
+                  statusCell.innerHTML = `<span class="status-${status}">${
+                    status.charAt(0).toUpperCase() + status.slice(1)
+                  }</span>`;
+                  const actionsCell = row.children[6];
+                  actionsCell.innerHTML = "";
+                }
           window.dispatchEvent(
             new CustomEvent(STATUS_UPDATED_EVENT, {
               detail: {
@@ -232,10 +241,23 @@
             "Are you sure you want to clear all holiday request records? This cannot be undone."
           )
         ) {
-          localStorage.removeItem("holidayRequests");
-          document.getElementById("holidayRequestsTable").innerHTML =
-            '<tr><td colspan="7" style="text-align: center;">No holiday requests found</td></tr>';
-          alert("All holiday request records have been cleared.");
+          // Clear from Firebase
+          saveToFirebase("holidayRequests", null)
+            .then(() => {
+              // Also clear from localStorage
+              localStorage.removeItem("holidayRequests");
+              document.getElementById("holidayRequestsTable").innerHTML =
+                '<tr><td colspan="7" style="text-align: center;">No holiday requests found</td></tr>';
+              alert("All holiday request records have been cleared.");
+            })
+            .catch(error => {
+              console.error('Error clearing holiday requests from Firebase:', error);
+              // Still clear from localStorage
+              localStorage.removeItem("holidayRequests");
+              document.getElementById("holidayRequestsTable").innerHTML =
+                '<tr><td colspan="7" style="text-align: center;">No holiday requests found</td></tr>';
+              alert("All holiday request records have been cleared locally. There was an error clearing from the cloud.");
+            });
         }
       }
       window.addEventListener(STATUS_UPDATED_EVENT, function (event) {

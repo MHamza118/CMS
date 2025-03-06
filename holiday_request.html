@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Holiday Request</title>
     <link rel="stylesheet" href="style.css" />
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="firebase.js"></script>
@@ -223,14 +223,62 @@
             status: "pending",
             submittedDate: new Date().toISOString(),
           };
-          let holidayRequests = JSON.parse(
-            localStorage.getItem("holidayRequests") || "[]"
-          );
-          holidayRequests.push(holidayRequest);
-          localStorage.setItem(
-            "holidayRequests",
-            JSON.stringify(holidayRequests)
-          );
+          
+          // Get current holiday requests from Firebase
+          getFirebaseData("holidayRequests", (firebaseRequests) => {
+            let holidayRequests = firebaseRequests || JSON.parse(
+              localStorage.getItem("holidayRequests") || "[]"
+            );
+            
+            holidayRequests.push(holidayRequest);
+            
+            // Save to Firebase
+            saveToFirebase("holidayRequests", holidayRequests)
+              .then(() => {
+                // Also save to localStorage as backup
+                localStorage.setItem(
+                  "holidayRequests",
+                  JSON.stringify(holidayRequests)
+                );
+                
+                window.dispatchEvent(
+                  new CustomEvent(STATUS_UPDATED_EVENT, {
+                    detail: {
+                      requestId: holidayRequest.id,
+                      status: "pending",
+                      employee: currentEmployee,
+                    },
+                  })
+                );
+                
+                if (window.opener && !window.opener.closed) {
+                  window.opener.dispatchEvent(
+                    new CustomEvent(STATUS_UPDATED_EVENT, {
+                      detail: {
+                        requestId: holidayRequest.id,
+                        status: "pending",
+                        employee: currentEmployee,
+                      },
+                    })
+                  );
+                }
+                
+                alert("Holiday request submitted successfully!");
+                document.getElementById("holidayRequestForm").reset();
+                loadRequestHistory();
+              })
+              .catch(error => {
+                console.error('Error saving holiday request to Firebase:', error);
+                // Still save to localStorage as backup
+                localStorage.setItem(
+                  "holidayRequests",
+                  JSON.stringify(holidayRequests)
+                );
+                alert("Holiday request submitted successfully (saved locally)!");
+                document.getElementById("holidayRequestForm").reset();
+                loadRequestHistory();
+              });
+          });
           window.dispatchEvent(
             new CustomEvent(STATUS_UPDATED_EVENT, {
               detail: {

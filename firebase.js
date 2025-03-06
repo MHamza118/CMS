@@ -1,5 +1,5 @@
 
-// Firebase configuration and initialization
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDmVkS1JM0-fu1cXGRCqrxZ0J1gOiK5SkY",
   authDomain: "fspro-c4de5.firebaseapp.com",
@@ -13,88 +13,152 @@ const firebaseConfig = {
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const database = firebase.database();
 
-// Database functions
-const firebaseDB = {
-  // Users
-  saveUsers: function(users) {
-    return db.ref('users').set(users);
-  },
-  getUsers: async function() {
-    const snapshot = await db.ref('users').once('value');
-    return snapshot.val() || {};
-  },
+// Firebase data handlers
+function saveToFirebase(path, data) {
+  return database.ref(path).set(data);
+}
+
+function updateFirebaseData(path, data) {
+  return database.ref(path).update(data);
+}
+
+function getFirebaseData(path, callback) {
+  database.ref(path).once('value', (snapshot) => {
+    callback(snapshot.val());
+  });
+}
+
+function listenForChanges(path, callback) {
+  database.ref(path).on('value', (snapshot) => {
+    callback(snapshot.val());
+  });
+}
+
+// Data helpers that replace localStorage functionality
+function saveData(key, data) {
+  // Save to Firebase
+  saveToFirebase(key, data);
   
-  // Attendance records
-  saveAttendanceRecords: function(records) {
-    return db.ref('attendanceRecords').set(records);
-  },
-  getAttendanceRecords: async function() {
-    const snapshot = await db.ref('attendanceRecords').once('value');
-    return snapshot.val() || [];
-  },
-  
-  // Late check-ins
-  saveLateCheckIns: function(checkIns) {
-    return db.ref('lateCheckIns').set(checkIns);
-  },
-  getLateCheckIns: async function() {
-    const snapshot = await db.ref('lateCheckIns').once('value');
-    return snapshot.val() || [];
-  },
-  
-  // Holiday requests
-  saveHolidayRequests: function(requests) {
-    return db.ref('holidayRequests').set(requests);
-  },
-  getHolidayRequests: async function() {
-    const snapshot = await db.ref('holidayRequests').once('value');
-    return snapshot.val() || [];
-  },
-  
-  // Progress reports
-  saveProgressReports: function(reports) {
-    return db.ref('progressReports').set(reports);
-  },
-  getProgressReports: async function() {
-    const snapshot = await db.ref('progressReports').once('value');
-    return snapshot.val() || [];
-  },
-  
-  // Time tables
-  saveTimeTables: function(timeTables) {
-    return db.ref('timeTables').set(timeTables);
-  },
-  getTimeTables: async function() {
-    const snapshot = await db.ref('timeTables').once('value');
-    return snapshot.val() || [];
-  },
-  
-  // Missed check-ins
-  saveMissedCheckIns: function(missedCheckIns) {
-    return db.ref('missedCheckIns').set(missedCheckIns);
-  },
-  getMissedCheckIns: async function() {
-    const snapshot = await db.ref('missedCheckIns').once('value');
-    return snapshot.val() || [];
-  },
-  
-  // Employee tasks
-  saveEmployeeTasks: function(tasks) {
-    return db.ref('employeeTasks').set(tasks);
-  },
-  getEmployeeTasks: async function() {
-    const snapshot = await db.ref('employeeTasks').once('value');
-    return snapshot.val() || [];
-  },
-  
-  // Notifications
-  saveNotifications: function(notifications) {
-    return db.ref('notifications').set(notifications);
-  },
-  getNotifications: async function() {
-    const snapshot = await db.ref('notifications').once('value');
-    return snapshot.val() || [];
+  // Still save to localStorage as backup
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (e) {
+    console.error('Error saving to localStorage:', e);
   }
-};
+}
+
+function getData(key, callback) {
+  // Try to get from Firebase first
+  getFirebaseData(key, (firebaseData) => {
+    if (firebaseData) {
+      callback(firebaseData);
+      
+      // Update localStorage with the latest data
+      try {
+        localStorage.setItem(key, JSON.stringify(firebaseData));
+      } catch (e) {
+        console.error('Error updating localStorage:', e);
+      }
+    } else {
+      // Fallback to localStorage if Firebase data not available
+      try {
+        const localData = JSON.parse(localStorage.getItem(key)) || null;
+        callback(localData);
+        
+        // If we have local data but not Firebase data, update Firebase
+        if (localData) {
+          saveToFirebase(key, localData);
+        }
+      } catch (e) {
+        console.error('Error fetching from localStorage:', e);
+        callback(null);
+      }
+    }
+  });
+}
+
+// Setup initial data listeners and sync
+function setupDataListeners() {
+  // Get initial data from Firebase and update localStorage
+  const dataKeys = [
+    'users', 
+    'attendanceRecords', 
+    'lateCheckIns', 
+    'missedCheckIns',
+    'holidayRequests', 
+    'progressReports', 
+    'timeTables',
+    'employeeTasks',
+    'notifications'
+  ];
+  
+  // First load all data from Firebase
+  dataKeys.forEach(key => {
+    getFirebaseData(key, (firebaseData) => {
+      if (firebaseData) {
+        // Update localStorage with firebase data
+        localStorage.setItem(key, JSON.stringify(firebaseData));
+        
+        // Update global variables if needed
+        if (key === 'users' && typeof window.users !== 'undefined') {
+          window.users = Object.assign({}, window.users, firebaseData);
+        }
+      } else {
+        // If no Firebase data, check if we have local data to upload
+        const localData = JSON.parse(localStorage.getItem(key));
+        if (localData) {
+          // Upload local data to Firebase
+          saveToFirebase(key, localData);
+        }
+      }
+    });
+  });
+  
+  // Then set up listeners for real-time updates
+  listenForChanges('users', (users) => {
+    if (users) {
+      localStorage.setItem('users', JSON.stringify(users));
+      // Update global variable
+      if (typeof window.users !== 'undefined') {
+        window.users = Object.assign({}, window.users, users);
+      }
+    }
+  });
+  
+  listenForChanges('attendanceRecords', (records) => {
+    if (records) localStorage.setItem('attendanceRecords', JSON.stringify(records));
+  });
+  
+  listenForChanges('lateCheckIns', (records) => {
+    if (records) localStorage.setItem('lateCheckIns', JSON.stringify(records));
+  });
+  
+  listenForChanges('missedCheckIns', (records) => {
+    if (records) localStorage.setItem('missedCheckIns', JSON.stringify(records));
+  });
+  
+  listenForChanges('holidayRequests', (requests) => {
+    if (requests) localStorage.setItem('holidayRequests', JSON.stringify(requests));
+  });
+  
+  listenForChanges('progressReports', (reports) => {
+    if (reports) localStorage.setItem('progressReports', JSON.stringify(reports));
+  });
+  
+  listenForChanges('timeTables', (tables) => {
+    if (tables) localStorage.setItem('timeTables', JSON.stringify(tables));
+  });
+  
+  listenForChanges('employeeTasks', (tasks) => {
+    if (tasks) localStorage.setItem('employeeTasks', JSON.stringify(tasks));
+  });
+  
+  listenForChanges('notifications', (notifications) => {
+    if (notifications) localStorage.setItem('notifications', JSON.stringify(notifications));
+  });
+}
+
+// Call this on application start
+window.addEventListener('load', setupDataListeners);
