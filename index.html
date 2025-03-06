@@ -469,7 +469,7 @@
                         </div>
                         <button class="add-slot" onclick="addTimeSlot('monday')">+ Add Time Slot</button>
                     </div>
-                    
+
                     <div class="day-container" id="tuesdayContainer">
                         <h3>Tuesday</h3>
                         <div class="time-slots" id="tuesdaySlots">
@@ -481,7 +481,7 @@
                         </div>
                         <button class="add-slot" onclick="addTimeSlot('tuesday')">+ Add Time Slot</button>
                     </div>
-                    
+
                     <div class="day-container" id="wednesdayContainer">
                         <h3>Wednesday</h3>
                         <div class="time-slots" id="wednesdaySlots">
@@ -493,7 +493,7 @@
                         </div>
                         <button class="add-slot" onclick="addTimeSlot('wednesday')">+ Add Time Slot</button>
                     </div>
-                    
+
                     <div class="day-container" id="thursdayContainer">
                         <h3>Thursday</h3>
                         <div class="time-slots" id="thursdaySlots">
@@ -505,19 +505,19 @@
                         </div>
                         <button class="add-slot" onclick="addTimeSlot('thursday')">+ Add Time Slot</button>
                     </div>
-                    
+
                     <div class="day-container" id="fridayContainer">
                         <h3>Friday</h3>
                         <div class="time-slots" id="fridaySlots">
                             <div class="time-slot">
                                 <input type="time" class="check-in-time" data-day="friday">
                                 <input type="time" class="check-out-time" data-day="friday">
-                                <button class="remove-slot" onclick="removeTimeSlot(this)" style="display:none;">X</button>
+                                <button class="remove-slot" onclick="removeTimeSlot(this)" style="display:none;">×</button>
                             </div>
                         </div>
                         <button class="add-slot" onclick="addTimeSlot('friday')">+ Add Time Slot</button>
                     </div>
-                    
+
                     <div class="day-container" id="saturdayContainer">
                         <h3>Saturday</h3>
                         <div class="time-slots" id="saturdaySlots">
@@ -1381,10 +1381,35 @@
                     alert('You are late but Less than 01 hour, check in.');
                     document.getElementById('lateCheckInBtn').style.display = 'inline-block';
                 }
-                addAttendanceRecord('checkIn');
-                alert('Check-in successful at ' + timeString);
-                clearNotifications();
-                loadAttendanceTable();
+                // Get current records from Firebase first
+                getFirebaseData('attendanceRecords', (firebaseRecords) => {
+                    let attendanceRecords = firebaseRecords || JSON.parse(localStorage.getItem('attendanceRecords')) || [];
+                    const recordIndex = attendanceRecords.findIndex(record =>
+                        record.employee === employee && record.date === dateString
+                    );
+                    if (recordIndex === -1) {
+                        attendanceRecords.push({
+                            employee: employee,
+                            date: dateString,
+                            day: dayOfWeek,
+                            checkIn: timeString
+                        });
+                    } else {
+                        attendanceRecords[recordIndex].checkIn = timeString;
+                    }
+                    saveToFirebase('attendanceRecords', attendanceRecords).then(() => {
+                        localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
+                        alert('Check-in successful at ' + timeString);
+                        clearNotifications();
+                        loadAttendanceTable();
+                    }).catch(error => {
+                        console.error('Error saving check-in to Firebase:', error);
+                        localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
+                        alert('Check-in successful at ' + timeString + ' (saved locally). There was an issue syncing with the cloud.');
+                        clearNotifications();
+                        loadAttendanceTable();
+                    });
+                });
             }
             function handleLateCheckIn() {
                 const now = new Date();
@@ -1611,7 +1636,7 @@
             }
             //Function for Submitting the Progress Report in the Employee Page.
             function submitProgress() {
-                const progressMessage = document.getElementById('progressMessage').value.trim();
+                const progressMessage =document.getElementById('progressMessage').value.trim();
                 const fileInput = document.getElementById('progressFile');
                 const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
                 const now = new Date();
@@ -1984,30 +2009,30 @@
                     <button class="remove-slot" onclick="removeTimeSlot(this)">×</button>
                 `;
                 daySlots.appendChild(timeSlotDiv);
-                
+
                 // Show remove buttons now that we have multiple slots
                 const removeButtons = daySlots.querySelectorAll('.remove-slot');
                 removeButtons.forEach(btn => btn.style.display = 'inline-block');
             }
-            
+
             function removeTimeSlot(button) {
                 const timeSlot = button.parentElement;
                 const daySlots = timeSlot.parentElement;
                 daySlots.removeChild(timeSlot);
-                
+
                 // If only one slot remains, hide its remove button
                 const remainingSlots = daySlots.querySelectorAll('.time-slot');
                 if (remainingSlots.length === 1) {
                     remainingSlots[0].querySelector('.remove-slot').style.display = 'none';
                 }
             }
-            
+
             function openTimeTableModal() {
                 const modal = document.getElementById('timeTableContent');
                 const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
                 const timeTables = JSON.parse(localStorage.getItem('timeTables')) || [];
                 const timeTable = timeTables.find(t => t.employee === employee) || {};
-                
+
                 // Clear existing slots first (except the first one)
                 const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
                 days.forEach(day => {
@@ -2016,24 +2041,24 @@
                     while (daySlots.children.length > 1) {
                         daySlots.removeChild(daySlots.lastChild);
                     }
-                    
+
                     // Reset the first slot's inputs
                     const firstSlot = daySlots.querySelector('.time-slot');
                     const checkInInput = firstSlot.querySelector('.check-in-time');
                     const checkOutInput = firstSlot.querySelector('.check-out-time');
                     checkInInput.value = '';
                     checkOutInput.value = '';
-                    
+
                     // Hide the remove button for the first slot
                     firstSlot.querySelector('.remove-slot').style.display = 'none';
                 });
-                
+
                 // Load time table data
                 days.forEach(day => {
                     if (timeTable[day]) {
                         const daySlots = document.getElementById(`${day}Slots`);
                         const timeSlots = timeTable[day];
-                        
+
                         // Handle both old format (single entry) and new format (array of entries)
                         let timeSlotsArray = [];
                         if (Array.isArray(timeSlots)) {
@@ -2044,7 +2069,7 @@
                                 checkOut: timeSlots.checkOut || ''
                             }];
                         }
-                        
+
                         // Fill in the first slot
                         if (timeSlotsArray.length > 0) {
                             const firstSlot = daySlots.querySelector('.time-slot');
@@ -2053,7 +2078,7 @@
                             checkInInput.value = timeSlotsArray[0].checkIn || '';
                             checkOutInput.value = timeSlotsArray[0].checkOut || '';
                         }
-                        
+
                         // Add additional slots as needed
                         for (let i = 1; i < timeSlotsArray.length; i++) {
                             const timeSlotDiv = document.createElement('div');
@@ -2065,7 +2090,7 @@
                             `;
                             daySlots.appendChild(timeSlotDiv);
                         }
-                        
+
                         // Show remove buttons if multiple slots exist
                         const slotCount = daySlots.querySelectorAll('.time-slot').length;
                         if (slotCount > 1) {
@@ -2074,25 +2099,25 @@
                         }
                     }
                 });
-                
+
                 modal.style.display = 'block';
                 document.getElementById('modalOverlay').style.display = 'block';
             }
-            
+
             function saveTimeTable() {
                 const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
                 const timeTable = { employee: employee };
                 const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-                
+
                 days.forEach(day => {
                     const daySlots = document.getElementById(`${day}Slots`);
                     const timeSlots = daySlots.querySelectorAll('.time-slot');
-                    
+
                     timeTable[day] = [];
                     timeSlots.forEach(slot => {
                         const checkIn = slot.querySelector('.check-in-time').value;
                         const checkOut = slot.querySelector('.check-out-time').value;
-                        
+
                         if (checkIn || checkOut) {
                             timeTable[day].push({
                                 checkIn: checkIn,
@@ -2134,7 +2159,7 @@
                 const tableBody = document.getElementById('adminTimeTableBody');
                 if (!tableBody) return;
                 tableBody.innerHTML = '';
-                
+
                 //If no user is selected
                 if (!selectedUser) {
                     const row = document.createElement('tr');
@@ -2142,7 +2167,7 @@
                     tableBody.appendChild(row);
                     return;
                 }
-                
+
                 //Find the time table for the selected user
                 const timeTable = timeTables.find(t => t.employee === selectedUser);
                 if (!timeTable) {
@@ -2151,13 +2176,13 @@
                     tableBody.appendChild(row);
                     return;
                 }
-                
+
                 //Populate the time table
                 const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
                 days.forEach(day => {
                     const dayName = day.charAt(0).toUpperCase() + day.slice(1);
                     const timeSlots = timeTable[day];
-                    
+
                     // Handle both old format (single entry) and new format (array of entries)
                     let timeSlotsArray = [];
                     if (Array.isArray(timeSlots)) {
@@ -2168,7 +2193,7 @@
                             checkOut: timeSlots.checkOut || ''
                         }];
                     }
-                    
+
                     if (timeSlotsArray.length === 0) {
                         // No time slots for this day
                         const row = document.createElement('tr');
@@ -2286,67 +2311,13 @@
                         }
                     });
             }
+            // This function is no longer used - we handle data directly in handleCheckIn and handleCheckOut
+            // Keeping as a comment for reference purposes
+            /*
             function addAttendanceRecord(type) {
-                const now = new Date();
-                const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-                const date = now.toLocaleDateString();
-                const day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
-                const time = now.toLocaleTimeString();
-
-                // Get current records from Firebase first
-                getFirebaseData('attendanceRecords', (firebaseRecords) => {
-                    //Get existing records
-                    let attendanceRecords = firebaseRecords || JSON.parse(localStorage.getItem('attendanceRecords')) || [];
-
-                    //Find if there's an existing record for today
-                    const recordIndex = attendanceRecords.findIndex(record =>
-                        record.employee === employee && record.date === date
-                    );
-
-                    if (recordIndex === -1) {
-                        //If no record exists for today, create one
-                        const newRecord = {
-                            employee: employee,
-                            date: date,
-                            day: day
-                        };
-                        if (type === 'checkIn') {
-                            newRecord.checkIn = time;
-                        } else if (type === 'checkOut') {
-                            newRecord.checkOut = time;
-                        }
-                        attendanceRecords.push(newRecord);
-                    } else {
-                        //update existing record.
-                        if (type === 'checkIn') {
-                            attendanceRecords[recordIndex].checkIn = time;
-                        } else if (type === 'checkOut') {
-                            //handle multiple checkouts.
-                            if (Array.isArray(attendanceRecords[recordIndex].checkOut)) {
-                                attendanceRecords[recordIndex].checkOut.push(time);
-                            } else if (attendanceRecords[recordIndex].checkOut) {
-                                attendanceRecords[recordIndex].checkOut = [attendanceRecords[recordIndex].checkOut, time];
-                            } else {
-                                attendanceRecords[recordIndex].checkOut = time;
-                            }
-                        }
-                    }
-
-                    // Save to Firebase
-                    saveToFirebase('attendanceRecords', attendanceRecords)
-                        .then(() => {
-                            // Save to localStorage as backup
-                            localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
-                            updateSummaryValues();
-                        })
-                        .catch(error => {
-                            console.error('Error saving attendance record to Firebase:', error);
-                            // Still save to localStorage as backup
-                            localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
-                            updateSummaryValues();
-                        });
-                });
+                // Functionality now integrated directly into the button handlers
             }
+            */
             function formatTimeToAMPM(time) {
                 if (!time) return '-';
                 const [hours, minutes] = time.split(':');
@@ -2547,27 +2518,27 @@
                 getFirebaseData('employeeTasks', (firebaseTasks) => {
                     // Use Firebase data or fallback to localStorage
                     const tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                    
+
                     // Update localStorage with the latest data from Firebase
                     if (firebaseTasks) {
                         localStorage.setItem('employeeTasks', JSON.stringify(firebaseTasks));
                     }
-                    
+
                     const tableBody = document.getElementById('adminTasksTable');
                     if (!tableBody) return;
                     tableBody.innerHTML = '';
-                    
+
                     if (!selectedUser) {
                         tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Please select an employee first</td></tr>';
                         return;
                     }
-                    
+
                     const filteredTasks = tasks.filter(task => task.employee === selectedUser);
                     if (filteredTasks.length === 0) {
                         tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No tasks assigned yet</td></tr>';
                         return;
                     }
-                    
+
                     filteredTasks.forEach(task => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
@@ -2605,7 +2576,7 @@
                     // Get latest tasks from Firebase first
                     getFirebaseData('employeeTasks', (firebaseTasks) => {
                         let tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                        
+
                         const newTask = {
                             id: Date.now(),
                             employee: selectedUser,
@@ -2618,16 +2589,16 @@
                             comment: '',
                             saved: true
                         };
-                        
+
                         tasks.push(newTask);
-                        
+
                         // Save to Firebase first
                         saveToFirebase('employeeTasks', tasks)
                             .then(() => {
                                 // Also save to localStorage
                                 localStorage.setItem('employeeTasks', JSON.stringify(tasks));
                                 loadAdminTasks(selectedUser);
-                                
+
                                 // Reset form
                                 document.getElementById('taskDate').value = '';
                                 document.getElementById('taskDay').value = '';
@@ -2639,13 +2610,13 @@
                                 // Still save to localStorage as backup
                                 localStorage.setItem('employeeTasks', JSON.stringify(tasks));
                                 loadAdminTasks(selectedUser);
-                                
+
                                 // Reset form
                                 document.getElementById('taskDate').value = '';
                                 document.getElementById('taskDay').value = '';
                                 document.getElementById('taskDescription').value = '';
                                 taskFileInput.value = '';
-                                
+
                                 alert('Task added and saved locally. There was an issue syncing with the cloud.');
                             });
                     });
@@ -2660,11 +2631,11 @@
                 // Get latest tasks from Firebase first
                 getFirebaseData('employeeTasks', (firebaseTasks) => {
                     let tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                    
+
                     const taskIndex = tasks.findIndex(t => t.id === taskId);
                     if (taskIndex !== -1) {
                         tasks[taskIndex][field] = value;
-                        
+
                         // Save to Firebase
                         saveToFirebase('employeeTasks', tasks)
                             .then(() => {
@@ -2687,18 +2658,18 @@
                         // Get latest tasks from Firebase first
                         getFirebaseData('employeeTasks', (firebaseTasks) => {
                             let tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                            
+
                             const taskIndex = tasks.findIndex(t => t.id === taskId);
                             if (taskIndex !== -1) {
                                 tasks[taskIndex].fileName = file.name;
                                 tasks[taskIndex].fileData = e.target.result;
-                                
+
                                 // Save to Firebase
                                 saveToFirebase('employeeTasks', tasks)
                                     .then(() => {
                                         // Also update localStorage
                                         localStorage.setItem('employeeTasks', JSON.stringify(tasks));
-                                        
+
                                         const selectedUser = document.getElementById('adminUserSelect').value;
                                         loadAdminTasks(selectedUser);
                                     })
@@ -2706,7 +2677,7 @@
                                         console.error('Error saving task file to Firebase:', error);
                                         // Still save to localStorage as backup
                                         localStorage.setItem('employeeTasks', JSON.stringify(tasks));
-                                        
+
                                         const selectedUser = document.getElementById('adminUserSelect').value;
                                         loadAdminTasks(selectedUser);
                                     });
@@ -2721,15 +2692,15 @@
                     // Get latest tasks from Firebase first
                     getFirebaseData('employeeTasks', (firebaseTasks) => {
                         let tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                        
+
                         tasks = tasks.filter(t => t.id !== taskId);
-                        
+
                         // Save to Firebase
                         saveToFirebase('employeeTasks', tasks)
                             .then(() => {
                                 // Also update localStorage
                                 localStorage.setItem('employeeTasks', JSON.stringify(tasks));
-                                
+
                                 const selectedUser = document.getElementById('adminUserSelect').value;
                                 loadAdminTasks(selectedUser);
                             })
@@ -2737,10 +2708,10 @@
                                 console.error('Error deleting task from Firebase:', error);
                                 // Still save to localStorage as backup
                                 localStorage.setItem('employeeTasks', JSON.stringify(tasks));
-                                
+
                                 const selectedUser = document.getElementById('adminUserSelect').value;
                                 loadAdminTasks(selectedUser);
-                                
+
                                 alert('Task deleted locally. There was an issue syncing with the cloud.');
                             });
                     });
@@ -2789,30 +2760,30 @@
             // Employee Task Management Functions
             function loadEmployeeTasks() {
                 const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-                
+
                 // Get tasks from Firebase first
                 getFirebaseData('employeeTasks', (firebaseTasks) => {
                     // Use Firebase data or fallback to localStorage
                     const tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                    
+
                     // Update localStorage with the latest data from Firebase
                     if (firebaseTasks) {
                         localStorage.setItem('employeeTasks', JSON.stringify(firebaseTasks));
                     }
-                    
+
                     const tableBody = document.getElementById('employeeTasksTable');
                     if (!tableBody) return;
                     tableBody.innerHTML = '';
-                    
+
                     const employeeTasks = tasks.filter(task =>
                         task.employee.trim() === employee.trim() && task.saved
                     ).sort((a, b) => new Date(b.date) - new Date(a.date));
-                    
+
                     if (employeeTasks.length === 0) {
                         tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No tasks assigned</td></tr>';
                         return;
                     }
-                    
+
                     employeeTasks.forEach(task => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
@@ -2846,16 +2817,16 @@
                 // Get latest tasks from Firebase first
                 getFirebaseData('employeeTasks', (firebaseTasks) => {
                     let tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                    
+
                     const taskIndex = tasks.findIndex(t => t.id === taskId);
                     if (taskIndex !== -1) {
                         tasks[taskIndex].status = status;
                         tasks[taskIndex].lastModified = new Date().toISOString();
-                        
+
                         if (status === 'Not Achieved' && !tasks[taskIndex].comment) {
                             alert('Please add Reason explaining why the task was not achieved.');
                         }
-                        
+
                         // Save to Firebase
                         saveToFirebase('employeeTasks', tasks)
                             .then(() => {
@@ -2874,12 +2845,12 @@
                 // Get latest tasks from Firebase first
                 getFirebaseData('employeeTasks', (firebaseTasks) => {
                     let tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                    
+
                     const taskIndex = tasks.findIndex(t => t.id === taskId);
                     if (taskIndex !== -1) {
                         tasks[taskIndex].comment = comment;
                         tasks[taskIndex].lastModified = new Date().toISOString();
-                        
+
                         // Save to Firebase
                         saveToFirebase('employeeTasks', tasks)
                             .then(() => {
@@ -2898,11 +2869,11 @@
                 // Get latest tasks from Firebase first
                 getFirebaseData('employeeTasks', (firebaseTasks) => {
                     let tasks = firebaseTasks || JSON.parse(localStorage.getItem('employeeTasks')) || [];
-                    
+
                     const taskIndex = tasks.findIndex(t => t.id === taskId);
                     if (taskIndex !== -1) {
                         tasks[taskIndex].lastModified = new Date().toISOString();
-                        
+
                         // Save to Firebase
                         saveToFirebase('employeeTasks', tasks)
                             .then(() => {
@@ -2910,7 +2881,7 @@
                                 localStorage.setItem('employeeTasks', JSON.stringify(tasks));
                                 alert('Changes saved successfully!');
                                 loadEmployeeTasks();
-                                
+
                                 // Refresh admin panel if it's open
                                 if (document.getElementById('adminPage').style.display !== 'none') {
                                     const selectedUser = document.getElementById('adminUserSelect').value;
@@ -2923,7 +2894,7 @@
                                 localStorage.setItem('employeeTasks', JSON.stringify(tasks));
                                 alert('Changes saved locally. There was an issue syncing with the cloud.');
                                 loadEmployeeTasks();
-                                
+
                                 // Refresh admin panel if it's open
                                 if (document.getElementById('adminPage').style.display !== 'none') {
                                     const selectedUser = document.getElementById('adminUserSelect').value;
@@ -3074,46 +3045,13 @@
                     });
                 });
             }
+            // This function is no longer used - we handle data directly in handleCheckIn and handleCheckOut
+            // Keeping as a comment for reference purposes
+            /*
             function addAttendanceRecord(type) {
-                const now = new Date();
-                const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
-                const date = now.toLocaleDateString();
-                const day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
-                const time = now.toLocaleTimeString();
-                // Get existing records
-                let attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
-                // Find if there's an existing record for today
-                const recordIndex = attendanceRecords.findIndex(record =>
-                    record.employee === employee && record.date === date
-                );
-                if (recordIndex === -1) {
-                    const newRecord = {
-                        employee: employee,
-                        date: date,
-                        day: day
-                    };
-                    if (type === 'checkIn') {
-                        newRecord.checkIn = time;
-                    } else if (type === 'checkOut') {
-                        newRecord.checkOut = time;
-                    }
-                    attendanceRecords.push(newRecord);
-                } else {
-                    if (type === 'checkIn') {
-                        attendanceRecords[recordIndex].checkIn = time;
-                    } else if (type === 'checkOut') {
-                        if (Array.isArray(attendanceRecords[recordIndex].checkOut)) {
-                            attendanceRecords[recordIndex].checkOut.push(time);
-                        } else if (attendanceRecords[recordIndex].checkOut) {
-                            attendanceRecords[recordIndex].checkOut = [attendanceRecords[recordIndex].checkOut, time];
-                        } else {
-                            attendanceRecords[recordIndex].checkOut = time;
-                        }
-                    }
-                }
-                localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
-                updateSummaryValues();
+                // Functionality now integrated directly into the button handlers
             }
+            */
             function recordMissedCheckIn() {
                 const now = new Date();
                 const employee = document.getElementById('employeeDetails').textContent.split('|')[0].trim();
